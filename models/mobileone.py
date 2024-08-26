@@ -348,7 +348,7 @@ class MobileOne(nn.Module):
         yaw = self.fc_yaw(x)
         pitch = self.fc_pitch(x)
 
-        return yaw, pitch
+        return pitch, yaw
 
 
 def reparameterize_model(model: torch.nn.Module) -> nn.Module:
