@@ -248,7 +248,7 @@ class ResNet(nn.Module):
         yaw = self.fc_yaw(x)
         pitch = self.fc_pitch(x)
 
-        return yaw, pitch
+        return pitch, yaw
 
 
 def load_filtered_state_dict(model, state_dict):
