@@ -37,10 +37,10 @@ pip install -r requirements.txt
 
    | Model        | Weights                                                                                               | Size    | Epochs | MAE   |
    | ------------ | ----------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
-   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)         | 43 MB   | 200    | 12.58 |
-   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)         | 81.6 MB | 200    | 11.37 |
-   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)         | 91.3 MB | 200    | \*    |
-   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)   | 9.59 MB | 200    | 13.23 |
+   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)         | 43 MB   | 200    | 12.84 |
+   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)         | 81.6 MB | 200    | 11.33 |
+   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)         | 91.3 MB | 200    | 11.34 |
+   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)   | 9.59 MB | 200    | \*    |
    | MobileOne S0 | [mobileone_s0.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0.pt) | 5.1 MB  | 200    | \*    |
    | MobileOne S1 | [mobileone_s1.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s1.pt) | 8.2 MB  | 200    | \*    |
    | MobileOne S2 | [mobileone_s2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s2.pt) | 14.8 MB | 200    | \*    |
