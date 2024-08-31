@@ -149,7 +149,7 @@ options:
 ### Inference
 
 ```bash
-detect.py [-h] [--arch ARCH] [--gaze-weights GAZE_WEIGHTS] [--face-weights FACE_WEIGHTS] [--view] [--input INPUT] [--output OUTPUT] [--dataset DATASET]
+detect.py --arch [arch_name] --gaze-weights [path_gaze_estimation_weights] --face-weights [face_det_weights] --view --input [input_file] --output [output_file] --dataset [dataset_name]
 ```
 
 `detect.py` arguments:
