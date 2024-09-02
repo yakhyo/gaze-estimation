@@ -77,7 +77,7 @@ def main(params):
         logging.info(f"Exception occured while loading pre-trained weights of face detection model. Exception: {e}")
 
     try:
-        gaze_detector = get_model(params.arch, params.bins)
+        gaze_detector = get_model(params.arch, params.bins, inference_mode=True)
         state_dict = torch.load(params.gaze_weights, map_location=device)
         gaze_detector.load_state_dict(state_dict)
         logging.info("Gaze Estimation model weights loaded.")

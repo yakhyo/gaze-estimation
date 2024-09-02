@@ -101,7 +101,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.backends.cudnn.benchmark = True
 
-    model = get_model(params.arch, params.bins)
+    model = get_model(params.arch, params.bins, inference_mode=True)
 
     if os.path.exists(params.weights):
         model.load_state_dict(torch.load(params.weights, map_location=device, weights_only=True))
