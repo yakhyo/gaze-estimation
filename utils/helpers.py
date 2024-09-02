@@ -21,7 +21,7 @@ from models import (
 )
 
 
-def get_model(arch, bins, pretrained=True):
+def get_model(arch, bins, pretrained=True, inference_mode=False):
     """Return the model based on the specified architecture."""
     if arch == 'resnet18':
         model = resnet18(pretrained=pretrained, num_classes=bins)
@@ -32,15 +32,15 @@ def get_model(arch, bins, pretrained=True):
     elif arch == "mobilenetv2":
         model = mobilenet_v2(pretrained=pretrained, num_classes=bins)
     elif arch == "mobileone_s0":
-        model = mobileone_s0(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s0(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
     elif arch == "mobileone_s1":
-        model = mobileone_s1(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s1(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
     elif arch == "mobileone_s2":
-        model = mobileone_s2(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s2(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
     elif arch == "mobileone_s3":
-        model = mobileone_s3(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s3(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
     elif arch == "mobileone_s4":
-        model = mobileone_s4(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s4(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
     else:
         raise ValueError(f"Please choose available model architecture, currently chosen: {arch}")
     return model
