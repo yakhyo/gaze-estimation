@@ -177,12 +177,115 @@ class MobileOneBlock(nn.Module):
         return self.activation(self.se(out))
 
     def reparameterize(self):
+        """ 
+        Following works like `RepVGG: Making VGG-style ConvNets Great Again` - https://arxiv.org/pdf/2101.03697.pdf. 
+        We re-parameterize multi-branched architecture used at training time to obtain a plain CNN-like structure
+        for inference.
+        """
+        if self.inference_mode:
+            return
+        kernel, bias = self._get_kernel_bias()
+        self.reparam_conv = nn.Conv2d(
+            in_channels=self.rbr_conv[0].conv.in_channels,
+            out_channels=self.rbr_conv[0].conv.out_channels,
+            kernel_size=self.rbr_conv[0].conv.kernel_size,
+            stride=self.rbr_conv[0].conv.stride,
+            padding=self.rbr_conv[0].conv.padding,
+            dilation=self.rbr_conv[0].conv.dilation,
+            groups=self.rbr_conv[0].conv.groups,
+            bias=True
+        )
+        self.reparam_conv.weight.data = kernel
+        self.reparam_conv.bias.data = bias
+
+        # Delete un-used branches
+        for para in self.parameters():
+            para.detach_()
+        self.__delattr__('rbr_conv')
+        self.__delattr__('rbr_scale')
+        if hasattr(self, 'rbr_skip'):
+            self.__delattr__('rbr_skip')
+
         self.inference_mode = True
 
     def _get_kernel_bias(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Method to fuse batchnorm layer with preceding conv layer.
+        Reference: https://github.com/DingXiaoH/RepVGG/blob/main/repvgg.py#L95
+
+        Args:
+            branch: The branch containing the convolutional and batchnorm layers to be fused.
+
+        Returns:
+            tuple: A tuple containing the kernel and bias after fusing batchnorm.
+        """
+        # get weights and bias of scale branch
+        kernel_scale = 0
+        bias_scale = 0
+        if self.rbr_scale is not None:
+            kernel_scale, bias_scale = self._fuse_bn_tensor(self.rbr_scale)
+            # Pad scale branch kernel to match conv branch kernel size.
+            pad = self.kernel_size // 2
+            kernel_scale = torch.nn.functional.pad(kernel_scale, [pad, pad, pad, pad])
+
+        # get weights and bias of skip branch
+        kernel_identity = 0
+        bias_identity = 0
+        if self.rbr_skip is not None:
+            kernel_identity, bias_identity = self._fuse_bn_tensor(self.rbr_skip)
+
+        # get weights and bias of conv branches
+        kernel_conv = 0
+        bias_conv = 0
+        for ix in range(self.num_conv_branches):
+            _kernel, _bias = self._fuse_bn_tensor(self.rbr_conv[ix])
+            kernel_conv += _kernel
+            bias_conv += _bias
+
+        kernel_final = kernel_conv + kernel_scale + kernel_identity
+        bias_final = bias_conv + bias_scale + bias_identity
         return kernel_final, bias_final
 
     def _fuse_bn_tensor(self, branch) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Method to fuse batchnorm layer with preceding conv layer.
+        Reference: https://github.com/DingXiaoH/RepVGG/blob/main/repvgg.py#L95
+
+        Args:
+            branch: The branch containing the convolutional and batchnorm layers to be fused.
+
+        Returns:
+            tuple: A tuple containing the kernel and bias after fusing batchnorm.
+        """
+        if isinstance(branch, nn.Sequential):
+            kernel = branch.conv.weight
+            running_mean = branch.bn.running_mean
+            running_var = branch.bn.running_var
+            gamma = branch.bn.weight
+            beta = branch.bn.bias
+            eps = branch.bn.eps
+        else:
+            assert isinstance(branch, nn.BatchNorm2d)
+            if not hasattr(self, 'id_tensor'):
+                input_dim = self.in_channels // self.groups
+                kernel_value = torch.zeros(
+                    (self.in_channels, input_dim, self.kernel_size, self.kernel_size),
+                    dtype=branch.weight.dtype,
+                    device=branch.weight.device
+                )
+                for i in range(self.in_channels):
+                    kernel_value[i, i % input_dim,
+                                 self.kernel_size // 2,
+                                 self.kernel_size // 2] = 1
+                self.id_tensor = kernel_value
+            kernel = self.id_tensor
+            running_mean = branch.running_mean
+            running_var = branch.running_var
+            gamma = branch.weight
+            beta = branch.bias
+            eps = branch.eps
+        std = (running_var + eps).sqrt()
+        t = (gamma / std).reshape(-1, 1, 1, 1)
         return kernel * t, beta - running_mean * gamma / std
 
     def _conv_bn(self, kernel_size: int, padding: int) -> nn.Sequential:

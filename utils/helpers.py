@@ -34,13 +34,13 @@ def get_model(arch, bins, pretrained=True):
     elif arch == "mobileone_s0":
         model = mobileone_s0(pretrained=pretrained, num_classes=bins)
     elif arch == "mobileone_s1":
-        model = mobileone_s0(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s1(pretrained=pretrained, num_classes=bins)
     elif arch == "mobileone_s2":
-        model = mobileone_s0(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s2(pretrained=pretrained, num_classes=bins)
     elif arch == "mobileone_s3":
-        model = mobileone_s0(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s3(pretrained=pretrained, num_classes=bins)
     elif arch == "mobileone_s4":
-        model = mobileone_s0(pretrained=pretrained, num_classes=bins)
+        model = mobileone_s4(pretrained=pretrained, num_classes=bins)
     else:
         raise ValueError(f"Please choose available model architecture, currently chosen: {arch}")
     return model

@@ -9,20 +9,8 @@ import torch.nn.functional as F
 
 from torch.utils.data import DataLoader
 
-from models import (
-    resnet18,
-    resnet34,
-    resnet50,
-    mobilenet_v2,
-    mobileone_s0,
-    mobileone_s1,
-    mobileone_s2,
-    mobileone_s3,
-    mobileone_s4
-)
 from config import data_config
 from utils.helpers import get_model, get_dataloader
-
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
