@@ -9,12 +9,10 @@ This project aims to perform gaze estimation using several deep learning models 
 
 ## Features
 
-- [x] **New Backbones and Refined Code Base**: Added support for new backbones (ResNet, MobileNet v2, MobileOne) with re-written and optimized code for better performance and flexibility.
-
-- [x] **ResNet**: [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
-- [x] **MobileNet v2**: [MobileNetV2: Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381)
-- [x] **MobileOne s0-s4**: [An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040)
-- [x] **Face Detection**: [Sample and Computation Redistribution for Efficient Face Detection](https://arxiv.org/abs/2105.04714) (used for inference)
+- [x] **ResNet**: [Deep Residual Networks](https://arxiv.org/abs/1512.03385) - Enables deeper networks with better accuracy through residual learning.
+- [x] **MobileNet v2**: [Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381) - Efficient model for mobile applications, balancing performance and computational cost.
+- [x] **MobileOne (s0-s4)**: [An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040) - Achieves near-instant inference times, ideal for real-time mobile applications.
+- [x] **Face Detection**: [SCFRD](https://arxiv.org/abs/2105.04714) - Sample and Computation Redistribution for Efficient Face Detection (SCRFD) model for efficient face detection.
 
 ## Installation
 
@@ -47,7 +45,7 @@ pip install -r requirements.txt
    | MobileOne S3 | [mobileone_s3_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s3.pt) | xx MB   | 200    | \*    |
    | MobileOne S4 | [mobileone_s4_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s4.pt) | xx MB   | 200    | \*    |
 
-   '\*' - soon will be uploaded...
+   '\*' - soon will be uploaded (due to limited computing resources I cannot publish rest of the weights, but you still can train them with given code).
 
    b) Run the command below to download weights to the `weights` directory (Linux):
 
