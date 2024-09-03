@@ -8,7 +8,7 @@ Video by Yan Krukau: https://www.pexels.com/video/male-teacher-with-his-students
 This project aims to perform gaze estimation using several deep learning models like ResNet, MobileNet v2, and MobileOne. It supports both classification and regression for predicting gaze direction. Built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net), the project includes additional pre-trained models and refined code for better performance and flexibility.
 
 ## Features
-
+- [ ] **ONNX Inference**: Export pytorch weights to ONNX and ONNX runtime inference.
 - [x] **ResNet**: [Deep Residual Networks](https://arxiv.org/abs/1512.03385) - Enables deeper networks with better accuracy through residual learning.
 - [x] **MobileNet v2**: [Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381) - Efficient model for mobile applications, balancing performance and computational cost.
 - [x] **MobileOne (s0-s4)**: [An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040) - Achieves near-instant inference times, ideal for real-time mobile applications.
