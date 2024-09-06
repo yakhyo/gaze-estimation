@@ -1,4 +1,4 @@
-# MobileGaze: Gaze Estimation
+# MobileGaze: Pre-trained mobile nets for Gaze-Estimation
 
 ![Downloads](https://img.shields.io/github/downloads/yakhyo/gaze-estimation/total) [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/yakhyo/gaze-estimation)
 
