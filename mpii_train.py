@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import argparse
+from sklearn.model_selection import KFold
 
 import torch
 import torch.nn as nn
@@ -9,7 +10,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from config import data_config
-from utils.helpers import get_model, get_dataloader
+from utils.helpers import angular_error, gaze_to_3d, get_model, get_dataloader
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -162,6 +163,55 @@ def train_one_epoch(
     return avg_loss_pitch, avg_loss_yaw
 
 
+@torch.no_grad()
+def evaluate(params, model, data_loader, idx_tensor, device):
+    """
+    Evaluate the model on the test dataset.
+
+    Args:
+        params (argparse.Namespace): Parsed command-line arguments.
+        model (nn.Module): The gaze estimation model.
+        data_loader (torch.utils.data.DataLoader): DataLoader for the test dataset.
+        idx_tensor (torch.Tensor): Tensor representing bin indices.
+        device (torch.device): Device to perform evaluation on.
+    """
+    model.eval()
+    average_error = 0
+    total_samples = 0
+
+    for images, labels_gaze, regression_labels_gaze, _ in tqdm(data_loader, total=len(data_loader)):
+        total_samples += regression_labels_gaze.size(0)
+        images = images.to(device)
+
+        # Regression labels
+        label_pitch = np.radians(regression_labels_gaze[:, 0], dtype=np.float32)
+        label_yaw = np.radians(regression_labels_gaze[:, 1], dtype=np.float32)
+
+        # Inference
+        pitch, yaw = model(images)
+
+        # Regression predictions
+        pitch_predicted = F.softmax(pitch, dim=1)
+        yaw_predicted = F.softmax(yaw, dim=1)
+
+        # Mapping from binned (0 to 90) to angles (-180 to 180) or (0 to 28) to angles (-42, 42)
+        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * params.binwidth - params.angle
+        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * params.binwidth - params.angle
+
+        pitch_predicted = np.radians(pitch_predicted.cpu())
+        yaw_predicted = np.radians(yaw_predicted.cpu())
+
+        for p, y, pl, yl in zip(pitch_predicted, yaw_predicted, label_pitch, label_yaw):
+            average_error += angular_error(gaze_to_3d([p, y]), gaze_to_3d([pl, yl]))
+
+    logging.info(
+        f"Dataset: {params.dataset} | "
+        f"Total Number of Samples: {total_samples} | "
+        f"Mean Angular Error: {average_error/total_samples}"
+    )
+    return average_error/total_samples
+
+
 def main():
     params = parse_args()
 
@@ -173,48 +223,76 @@ def main():
     torch.backends.cudnn.benchmark = True
 
     model, optimizer, start_epoch = initialize_model(params, device)
-    train_loader = get_dataloader(params, mode="train")
+    data_loader = get_dataloader(params, mode="train")
+    dataset = data_loader.dataset
 
     cls_criterion = nn.CrossEntropyLoss()
     reg_criterion = nn.MSELoss()
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
     best_loss = float('inf')
-    print(f"Started training from epoch: {start_epoch + 1}")
+    k = 5  # number of folds
+    kfold = KFold(n_splits=k, shuffle=True, random_state=42)
 
-    for epoch in range(start_epoch, params.num_epochs):
-        avg_loss_pitch, avg_loss_yaw = train_one_epoch(
-            params,
-            model,
-            cls_criterion,
-            reg_criterion,
-            optimizer,
-            train_loader,
-            idx_tensor,
-            device,
-            epoch
-        )
+    fold_losses = []
+    # K-Fold Cross Validation
+    for fold, (train_idx, val_idx) in enumerate(kfold.split(dataset)):
+        print(f"Fold {fold+1}/{k}")
 
-        logging.info(
-            f'Epoch [{epoch + 1}/{params.num_epochs}] '
-            f'Losses: Gaze Yaw {avg_loss_yaw:.4f}, Gaze Pitch {avg_loss_pitch:.4f}'
-        )
+        # Split data into training and validation sets for this fold
+        train_subset = torch.utils.data.Subset(dataset, train_idx)
+        val_subset = torch.utils.data.Subset(dataset, val_idx)
 
-        checkpoint_path = os.path.join(output, "checkpoint.ckpt")
-        torch.save({
-            'epoch': epoch + 1,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': avg_loss_pitch + avg_loss_yaw,
-        }, checkpoint_path)
-        logging.info(f'Checkpoint saved at {checkpoint_path}')
+        # Create data loaders for the subsets
+        train_loader = torch.utils.data.DataLoader(train_subset, batch_size=params.batch_size, shuffle=True)
+        val_loader = torch.utils.data.DataLoader(val_subset, batch_size=params.batch_size, shuffle=False)
 
-        current_loss = (avg_loss_pitch + avg_loss_yaw) / len(train_loader)
-        if current_loss < best_loss:
-            best_loss = current_loss
-            best_model_path = os.path.join(output, 'best_model.pt')
+        # Reset model and optimizer for each fold
+        model, optimizer, start_epoch = initialize_model(params, device)
+
+        for epoch in range(start_epoch, params.num_epochs):
+            avg_loss_pitch, avg_loss_yaw = train_one_epoch(
+                params,
+                model,
+                cls_criterion,
+                reg_criterion,
+                optimizer,
+                train_loader,
+                idx_tensor,
+                device,
+                epoch
+            )
+
+            logging.info(
+                f'Epoch [{epoch + 1}/{params.num_epochs}] '
+                f'Losses: Gaze Yaw {avg_loss_yaw:.4f}, Gaze Pitch {avg_loss_pitch:.4f}'
+            )
+
+            checkpoint_path = os.path.join(output, f"checkpoint_fold_{fold+1}.ckpt")
+            torch.save({
+                'epoch': epoch + 1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': avg_loss_pitch + avg_loss_yaw,
+            }, checkpoint_path)
+            logging.info(f'Checkpoint saved at {checkpoint_path}')
+
+        # Evaluate on validation set for the current fold
+        avg_error = evaluate(params, model, val_loader, idx_tensor, device)  # Returns average error
+        fold_errors.append(avg_error)
+
+        logging.info(f'Fold {fold+1} average error: {avg_error:.4f}')
+
+        # Save the best model for the fold
+        if avg_error < best_avg_error:
+            best_avg_error = avg_error
+            best_model_path = os.path.join(output, f'best_model_fold_{fold+1}.pt')
             torch.save(model.state_dict(), best_model_path)
-            logging.info(f'Best model saved at {best_model_path}')
+            logging.info(f'Best model saved for fold {fold+1} at {best_model_path}')
+
+    # Calculate average error across all folds
+    avg_error_overall = np.mean(fold_errors)
+    logging.info(f'Average error across {k} folds: {avg_error_overall:.4f}')
 
 
 if __name__ == '__main__':
