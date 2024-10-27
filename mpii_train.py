@@ -1,7 +1,10 @@
 import os
+import sys
 import time
 import logging
 import argparse
+import numpy as np
+from tqdm import tqdm
 from sklearn.model_selection import KFold
 
 import torch
@@ -13,7 +16,14 @@ from config import data_config
 from utils.helpers import angular_error, gaze_to_3d, get_model, get_dataloader
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    # handlers=[
+    #     logging.FileHandler("training.log"),
+    #     logging.StreamHandler(sys.stdout)  # Display logs in terminal
+    # ]
+)
 
 
 def parse_args():
@@ -230,11 +240,11 @@ def main():
     reg_criterion = nn.MSELoss()
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
-    best_loss = float('inf')
+    best_avg_error = float('inf')
     k = 5  # number of folds
     kfold = KFold(n_splits=k, shuffle=True, random_state=42)
 
-    fold_losses = []
+    fold_errors = []
     # K-Fold Cross Validation
     for fold, (train_idx, val_idx) in enumerate(kfold.split(dataset)):
         print(f"Fold {fold+1}/{k}")
@@ -268,14 +278,14 @@ def main():
                 f'Losses: Gaze Yaw {avg_loss_yaw:.4f}, Gaze Pitch {avg_loss_pitch:.4f}'
             )
 
-            checkpoint_path = os.path.join(output, f"checkpoint_fold_{fold+1}.ckpt")
-            torch.save({
-                'epoch': epoch + 1,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': avg_loss_pitch + avg_loss_yaw,
-            }, checkpoint_path)
-            logging.info(f'Checkpoint saved at {checkpoint_path}')
+            # checkpoint_path = os.path.join(output, f"checkpoint_fold_{fold+1}.ckpt")
+            # torch.save({
+            #     'epoch': epoch + 1,
+            #     'model_state_dict': model.state_dict(),
+            #     'optimizer_state_dict': optimizer.state_dict(),
+            #     'loss': avg_loss_pitch + avg_loss_yaw,
+            # }, checkpoint_path)
+            # logging.info(f'Checkpoint saved at {checkpoint_path}')
 
         # Evaluate on validation set for the current fold
         avg_error = evaluate(params, model, val_loader, idx_tensor, device)  # Returns average error
@@ -286,7 +296,7 @@ def main():
         # Save the best model for the fold
         if avg_error < best_avg_error:
             best_avg_error = avg_error
-            best_model_path = os.path.join(output, f'best_model_fold_{fold+1}.pt')
+            best_model_path = os.path.join(output, f'best_model.pt')
             torch.save(model.state_dict(), best_model_path)
             logging.info(f'Best model saved for fold {fold+1} at {best_model_path}')
 
