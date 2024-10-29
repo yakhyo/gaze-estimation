@@ -175,3 +175,7 @@ options:
 1. This project is built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net). Most of the code parts have been re-written for reproducibility and adaptability. Several additional backbones are provided with pre-trained weights.
 2. https://github.com/apple/ml-mobileone
 3. https://github.com/yakhyo/face-reidentification (used for inference, modified from [insightface](https://github.com/deepinsight/insightface))
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=yakhyo/gaze-estimation&type=Date)](https://star-history.com/#yakhyo/gaze-estimation&Date)
