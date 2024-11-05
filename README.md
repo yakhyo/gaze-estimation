@@ -1,6 +1,8 @@
 # MobileGaze: Pre-trained mobile nets for Gaze-Estimation
 
-![Downloads](https://img.shields.io/github/downloads/yakhyo/gaze-estimation/total) [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/yakhyo/gaze-estimation)
+![Downloads](https://img.shields.io/github/downloads/yakhyo/gaze-estimation/total)
+[![GitHub Repo stars](https://img.shields.io/github/stars/yakhyo/gaze-estimation)](https://github.com/yakhyo/gaze-estimation/stargazers)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/yakhyo/gaze-estimation)
 
 <video controls autoplay loop src="https://github.com/user-attachments/assets/a3af56a9-25af-4827-b716-27f610def59a" muted="false" width="100%"></video>
 Video by Yan Krukau: https://www.pexels.com/video/male-teacher-with-his-students-8617126/
