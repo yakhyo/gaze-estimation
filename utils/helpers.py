@@ -91,20 +91,21 @@ def get_dataloader(params,  mode="train"):
     )
     return data_loader
 
-def draw_gaze(frame, pitch, yaw, thickness=2, color=(0, 0, 255), length_scale=0.6):
-    """Draws a longer gaze direction on a frame given gaze angles (pitch and yaw)."""
-    
+def draw_gaze(frame, bbox, pitch, yaw, thickness=2, color=(0, 0, 255)):
+    """Draws gaze direction on a frame given bounding box and gaze angles."""
+    # Unpack bounding box coordinates
+    x_min, y_min, x_max, y_max = map(int, bbox[:4])
+
+    # Calculate center of the bounding box
+    x_center = (x_min + x_max) // 2
+    y_center = (y_min + y_max) // 2
+
     # Handle grayscale frames by converting them to BGR
     if len(frame.shape) == 2 or frame.shape[2] == 1:
         frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-    # Calculate the center of the image (assuming it's a face image)
-    h, w = frame.shape[:2]
-    x_center = w // 2
-    y_center = h // 2
-
     # Calculate the direction of the gaze
-    length = int(w * length_scale)  # Scale the arrow length based on image width
+    length = x_max - x_min
     dx = int(-length * np.sin(pitch) * np.cos(yaw))
     dy = int(-length * np.sin(yaw))
 
@@ -120,7 +121,7 @@ def draw_gaze(frame, pitch, yaw, thickness=2, color=(0, 0, 255), length_scale=0.
         color=color,
         thickness=thickness,
         line_type=cv2.LINE_AA,
-        tipLength=0.3  # Adjust tip length for better visibility
+        tipLength=0.25
     )
 
 
