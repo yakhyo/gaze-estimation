@@ -172,6 +172,25 @@ options:
   --dataset DATASET     Dataset name to get dataset related configs
 ```
 
+## Citation
+
+If you use this work in your research, please cite it as:
+
+Valikhujaev, Y. (2024). MobileGaze: Pre-trained mobile nets for Gaze-Estimation. Zenodo. [https://doi.org/10.5281/zenodo.14257640](https://doi.org/10.5281/zenodo.14257640)
+
+Alternatively, in BibTeX format:
+
+```bibtex
+@misc{valikhujaev2024mobilegaze,
+  author       = {Valikhujaev, Y.},
+  title        = {MobileGaze: Pre-trained mobile nets for Gaze-Estimation},
+  year         = {2024},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.14257640},
+  url          = {https://doi.org/10.5281/zenodo.14257640}
+}
+```
+
 ## Reference
 
 1. This project is built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net). Most of the code parts have been re-written for reproducibility and adaptability. Several additional backbones are provided with pre-trained weights.
