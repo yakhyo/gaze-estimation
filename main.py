@@ -59,7 +59,7 @@ def initialize_model(params, device):
     Returns:
         Tuple[nn.Module, torch.optim.Optimizer, int]: Initialized model, optimizer, and the starting epoch.
     """
-    model = get_model(params.arch, params.bins)
+    model = get_model(params.arch, params.bins, pretrained=True)
     optimizer = torch.optim.Adam(model.parameters(), lr=params.lr)
     start_epoch = 0
 
@@ -130,9 +130,12 @@ def train_one_epoch(
         loss_pitch = cls_criterion(pitch, label_pitch)
         loss_yaw = cls_criterion(yaw, label_yaw)
 
+        # Softmax
+        pitch, yaw = F.softmax(pitch, dim=1), F.softmax(yaw, dim=1)
+
         # Mapping from binned (0 to 90) to angels (-180 to 180)
-        pitch_predicted = torch.sum(F.softmax(pitch, dim=1) * idx_tensor, 1) * params.binwidth - params.angle
-        yaw_predicted = torch.sum(F.softmax(yaw, dim=1) * idx_tensor, 1) * params.binwidth - params.angle
+        pitch_predicted = torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
+        yaw_predicted = torch.sum(yaw * idx_tensor, 1) * params.binwidth - params.angle
 
         # Mean Squared Error Loss
         loss_regression_pitch = reg_criterion(pitch_predicted, label_pitch_regression)

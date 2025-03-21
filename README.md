@@ -13,11 +13,12 @@ Video by Yan Krukau: https://www.pexels.com/video/male-teacher-with-his-students
 This project aims to perform gaze estimation using several deep learning models like ResNet, MobileNet v2, and MobileOne. It supports both classification and regression for predicting gaze direction. Built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net), the project includes additional pre-trained models and refined code for better performance and flexibility.
 
 ## Features
+
 - [ ] **ONNX Inference**: Export pytorch weights to ONNX and ONNX runtime inference.
 - [x] **ResNet**: [Deep Residual Networks](https://arxiv.org/abs/1512.03385) - Enables deeper networks with better accuracy through residual learning.
 - [x] **MobileNet v2**: [Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381) - Efficient model for mobile applications, balancing performance and computational cost.
 - [x] **MobileOne (s0-s4)**: [An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040) - Achieves near-instant inference times, ideal for real-time mobile applications.
-- [x] **Face Detection**: [SCFRD](https://arxiv.org/abs/2105.04714) - Sample and Computation Redistribution for Efficient Face Detection (SCRFD) model for efficient face detection.
+- [x] **Face Detection**: [uniface](https://github.com/yakhyo/uniface) - **Uniface** face detection library uses RetinaFace model.
 
 ## Installation
 
@@ -167,8 +168,6 @@ options:
   --arch ARCH           Model name, default `resnet18`
   --gaze-weights GAZE_WEIGHTS
                         Path to gaze esimation model weights
-  --face-weights FACE_WEIGHTS
-                        Path to face detection model weights
   --view                Display the inference results
   --input INPUT         Path to input video file
   --output OUTPUT       Path to save output file
@@ -198,7 +197,7 @@ Alternatively, in BibTeX format:
 
 1. This project is built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net). Most of the code parts have been re-written for reproducibility and adaptability. Several additional backbones are provided with pre-trained weights.
 2. https://github.com/apple/ml-mobileone
-3. https://github.com/yakhyo/face-reidentification (used for inference, modified from [insightface](https://github.com/deepinsight/insightface))
+3. [uniface](https://github.com/yakhyo/uniface) - face detection library used for inference in `detect.py`.
 
 <!--
 ## Star History

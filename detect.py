@@ -10,9 +10,10 @@ import torch.nn.functional as F
 from torchvision import transforms
 
 
-from models import SCRFD
 from config import data_config
 from utils.helpers import get_model, draw_bbox_gaze
+
+import uniface
 
 warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -20,18 +21,12 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gaze estimation inference")
-    parser.add_argument("--arch", type=str, default="resnet34", help="Model name, default `resnet18`")
+    parser.add_argument("--model", type=str, default="resnet34", help="Model name, default `resnet18`")
     parser.add_argument(
-        "--gaze-weights",
+        "--weight",
         type=str,
-        default="output/gaze360_resnet34_1724339168/best_model.pt",
+        default="resnet34.pt",
         help="Path to gaze esimation model weights"
-    )
-    parser.add_argument(
-        "--face-weights",
-        type=str,
-        default="weights/det_10g.onnx",
-        help="Path to face detection model weights"
     )
     parser.add_argument("--view", action="store_true", help="Display the inference results")
     parser.add_argument("--input", type=str, default="assets/in_video.mp4", help="Path to input video file")
@@ -70,15 +65,11 @@ def main(params):
 
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
-    try:
-        face_detector = SCRFD(model_path=params.face_weights)
-        logging.info("Face Detection model weights loaded.")
-    except Exception as e:
-        logging.info(f"Exception occured while loading pre-trained weights of face detection model. Exception: {e}")
+    face_detector = uniface.RetinaFace(model="retinaface_mnet_v2") # third-party face detection library
 
     try:
-        gaze_detector = get_model(params.arch, params.bins, inference_mode=True)
-        state_dict = torch.load(params.gaze_weights, map_location=device)
+        gaze_detector = get_model(params.model, params.bins, inference_mode=True)
+        state_dict = torch.load(params.weight, map_location=device)
         gaze_detector.load_state_dict(state_dict)
         logging.info("Gaze Estimation model weights loaded.")
     except Exception as e:
