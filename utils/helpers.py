@@ -21,7 +21,7 @@ from models import (
 )
 
 
-def get_model(arch, bins, pretrained=True, inference_mode=False):
+def get_model(arch, bins, pretrained=False, inference_mode=False):
     """Return the model based on the specified architecture."""
     if arch == 'resnet18':
         model = resnet18(pretrained=pretrained, num_classes=bins)

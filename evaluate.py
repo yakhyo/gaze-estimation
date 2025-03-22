@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Gaze estimation evaluation")
     parser.add_argument("--data", type=str, default="data/Gaze360", help="Directory path for gaze images.")
     parser.add_argument("--dataset", type=str, default="gaze360", help="Dataset name, available `gaze360`, `mpiigaze`")
-    parser.add_argument("--weights", type=str, default="", help="Path to model weight for evaluation.")
+    parser.add_argument("--weight", type=str, default="", help="Path to model weight for evaluation.")
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size.")
     parser.add_argument(
         "--arch",
@@ -103,10 +103,10 @@ def main():
 
     model = get_model(params.arch, params.bins, inference_mode=True)
 
-    if os.path.exists(params.weights):
-        model.load_state_dict(torch.load(params.weights, map_location=device, weights_only=True))
+    if os.path.exists(params.weight):
+        model.load_state_dict(torch.load(params.weight, map_location=device, weights_only=True))
     else:
-        raise ValueError(f"Model weight not found at {params.weights}")
+        raise ValueError(f"Model weight not found at {params.weight}")
 
     model.to(device)
     test_loader = get_dataloader(params, mode="test")

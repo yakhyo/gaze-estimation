@@ -7,17 +7,27 @@
 
 <h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest updates.</h5>
 
+<!--
+<div align="center">
+  <img src="assets/out_video.gif">
+</div>
+-->
+
 <video controls autoplay loop src="https://github.com/user-attachments/assets/a3af56a9-25af-4827-b716-27f610def59a" muted="false" width="100%"></video>
 Video by Yan Krukau: https://www.pexels.com/video/male-teacher-with-his-students-8617126/
 
 This project aims to perform gaze estimation using several deep learning models like ResNet, MobileNet v2, and MobileOne. It supports both classification and regression for predicting gaze direction. Built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net), the project includes additional pre-trained models and refined code for better performance and flexibility.
 
 ## Features
-- [ ] **ONNX Inference**: Export pytorch weights to ONNX and ONNX runtime inference.
+
+- [x] **ONNX Inference**: Export pytorch weights to ONNX and ONNX runtime inference.
 - [x] **ResNet**: [Deep Residual Networks](https://arxiv.org/abs/1512.03385) - Enables deeper networks with better accuracy through residual learning.
 - [x] **MobileNet v2**: [Inverted Residuals and Linear Bottlenecks](https://arxiv.org/abs/1801.04381) - Efficient model for mobile applications, balancing performance and computational cost.
 - [x] **MobileOne (s0-s4)**: [An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040) - Achieves near-instant inference times, ideal for real-time mobile applications.
-- [x] **Face Detection**: [SCFRD](https://arxiv.org/abs/2105.04714) - Sample and Computation Redistribution for Efficient Face Detection (SCRFD) model for efficient face detection.
+- [x] **Face Detection**: [uniface](https://github.com/yakhyo/uniface) - **Uniface** face detection library uses RetinaFace model.
+
+> [!NOTE]  
+> All models are trained only on **Gaze360** dataset.
 
 ## Installation
 
@@ -38,17 +48,17 @@ pip install -r requirements.txt
 
    a) Download weights from the following links:
 
-   | Model        | Weights                                                                                                     | Size    | Epochs | MAE   |
-   | ------------ | ----------------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
-   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)               | 43 MB   | 200    | 12.84 |
-   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)               | 81.6 MB | 200    | 11.33 |
-   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)               | 91.3 MB | 200    | 11.34 |
-   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)         | 9.59 MB | 200    | 13.07 |
-   | MobileOne S0 | [mobileone_s0_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0.pt) | 4.8 MB  | 200    | 12.58 |
-   | MobileOne S1 | [mobileone_s1_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s1.pt) | xx MB   | 200    | \*    |
-   | MobileOne S2 | [mobileone_s2_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s2.pt) | xx MB   | 200    | \*    |
-   | MobileOne S3 | [mobileone_s3_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s3.pt) | xx MB   | 200    | \*    |
-   | MobileOne S4 | [mobileone_s4_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s4.pt) | xx MB   | 200    | \*    |
+   | Model        | PyTorch Weights                                                                                             | ONNX Weights                                                                                                        | Size    | Epochs | MAE   |
+   | ------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
+   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)               | [resnet18_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18_gaze.onnx)         | 43 MB   | 200    | 12.84 |
+   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)               | [resnet34_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34_gaze.onnx)         | 81.6 MB | 200    | 11.33 |
+   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)               | [resnet50_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50_gaze.onnx)         | 91.3 MB | 200    | 11.34 |
+   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)         | [mobilenetv2_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2_gaze.onnx)   | 9.59 MB | 200    | 13.07 |
+   | MobileOne S0 | [mobileone_s0_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0.pt) | [mobileone_s0_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0_gaze.onnx) | 4.8 MB  | 200    | 12.58 |
+   | MobileOne S1 | [not available](#)                                                                                          | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+   | MobileOne S2 | [not available](#)                                                                                          | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+   | MobileOne S3 | [not available](#)                                                                                          | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+   | MobileOne S4 | [not availablet](#)                                                                                         | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
 
    '\*' - soon will be uploaded (due to limited computing resources I cannot publish rest of the weights, but you still can train them with given code).
 
@@ -127,7 +137,7 @@ options:
 ### Evaluation
 
 ```bash
-python evaluate.py --data [dataset_path] --dataset [dataset_name] --weights [weights_path] --arch [architecture_name]
+python evaluate.py --data [dataset_path] --dataset [dataset_name] --weight [weight_path] --arch [architecture_name]
 ```
 
 `evaluate.py` arguments:
@@ -152,27 +162,70 @@ options:
 ### Inference
 
 ```bash
-detect.py --arch [arch_name] --gaze-weights [path_gaze_estimation_weights] --face-weights [face_det_weights] --view --input [input_file] --output [output_file] --dataset [dataset_name]
+inference.py --model [model_name] --weight [model_weight_path] --view --source [source_video / cam_index] --output [output_file] --dataset [dataset_name]
 ```
 
 `detect.py` arguments:
 
 ```
-usage: detect.py [-h] [--arch ARCH] [--gaze-weights GAZE_WEIGHTS] [--face-weights FACE_WEIGHTS] [--view] [--input INPUT] [--output OUTPUT] [--dataset DATASET]
+usage: inference.py [-h] [--model MODEL] [--weight WEIGHT] [--view] [--source SOURCE] [--output OUTPUT] [--dataset DATASET]
 
-Gaze Estimation Inference Arguments
+Gaze estimation inference
+
+options:
+  -h, --help         show this help message and exit
+  --model MODEL      Model name, default `resnet18`
+  --weight WEIGHT    Path to gaze esimation model weights
+  --view             Display the inference results
+  --source SOURCE    Path to source video file or camera index
+  --output OUTPUT    Path to save output file
+  --dataset DATASET  Dataset name to get dataset related configs
+```
+
+### ONNX Export and Inference
+
+**Export to ONNX**
+
+```bash
+python onnx_export.py --weight [model_path] --model [model_name] --dynamic
+```
+
+`onnx_export.py` arguments:
+
+```
+usage: onnx_export.py [-h] [-w WEIGHT] [-n {resnet18,resnet34,resnet50,mobilenetv2,mobileone_s0}] [-d {gaze360}] [--dynamic]
+
+Gaze Estimation Model ONNX Export
 
 options:
   -h, --help            show this help message and exit
-  --arch ARCH           Model name, default `resnet18`
-  --gaze-weights GAZE_WEIGHTS
-                        Path to gaze esimation model weights
-  --face-weights FACE_WEIGHTS
-                        Path to face detection model weights
-  --view                Display the inference results
-  --input INPUT         Path to input video file
-  --output OUTPUT       Path to save output file
-  --dataset DATASET     Dataset name to get dataset related configs
+  -w WEIGHT, --weight WEIGHT
+                        Trained state_dict file path to open
+  -n {resnet18,resnet34,resnet50,mobilenetv2,mobileone_s0}, --model {resnet18,resnet34,resnet50,mobilenetv2,mobileone_s0}
+                        Backbone network architecture to use
+  -d {gaze360,mpiigaze}, --dataset {gaze360,mpiigaze}
+                        Dataset name for bin configuration
+  --dynamic             Enable dynamic batch size and input dimensions for ONNX export
+```
+
+**ONNX Inference**
+
+```bash
+python onnx_inference.py --source [source video / webcam index] --model [onnx model path] --output [path to save video]
+```
+
+`onnx_inference.py` arguments:
+
+```
+usage: onnx_inference.py [-h] --source SOURCE --model MODEL [--output OUTPUT]
+
+Gaze Estimation ONNX Inference
+
+options:
+  -h, --help       show this help message and exit
+  --source SOURCE  Video path or camera index (e.g., 0 for webcam)
+  --model MODEL    Path to ONNX model
+  --output OUTPUT  Path to save output video (optional)
 ```
 
 ## Citation
@@ -198,7 +251,7 @@ Alternatively, in BibTeX format:
 
 1. This project is built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net). Most of the code parts have been re-written for reproducibility and adaptability. Several additional backbones are provided with pre-trained weights.
 2. https://github.com/apple/ml-mobileone
-3. https://github.com/yakhyo/face-reidentification (used for inference, modified from [insightface](https://github.com/deepinsight/insightface))
+3. [uniface](https://github.com/yakhyo/uniface) - face detection library used for inference in `detect.py`.
 
 <!--
 ## Star History
