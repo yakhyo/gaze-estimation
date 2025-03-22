@@ -16,13 +16,15 @@ fi
 # Determine the model name
 MODEL_NAME=$1
 MODEL_FILE="${MODEL_NAME}.pt"
+MODEL_FILE_ONNX="${MODEL_NAME}_gaze.onnx"
 
 # Download the model
 wget -O weights/$MODEL_FILE $BASE_URL/$MODEL_FILE
+wget -O weights/$MODEL_FILE $BASE_URL/$MODEL_FILE_ONNX
 
 # Check if the download was successful
 if [ $? -eq 0 ]; then
-    echo "Downloaded $MODEL_FILE to weights/"
+    echo "Downloaded $MODEL_FILE and $MODEL_FILE_ONNX to weights/"
 else
     echo "Failed to download $MODEL_FILE"
 fi

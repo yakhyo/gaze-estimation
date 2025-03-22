@@ -39,17 +39,17 @@ pip install -r requirements.txt
 
    a) Download weights from the following links:
 
-   | Model        | Weights                                                                                                     | Size    | Epochs | MAE   |
-   | ------------ | ----------------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
-   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)               | 43 MB   | 200    | 12.84 |
-   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)               | 81.6 MB | 200    | 11.33 |
-   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)               | 91.3 MB | 200    | 11.34 |
-   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)         | 9.59 MB | 200    | 13.07 |
-   | MobileOne S0 | [mobileone_s0_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0.pt) | 4.8 MB  | 200    | 12.58 |
-   | MobileOne S1 | [mobileone_s1_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s1.pt) | xx MB   | 200    | \*    |
-   | MobileOne S2 | [mobileone_s2_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s2.pt) | xx MB   | 200    | \*    |
-   | MobileOne S3 | [mobileone_s3_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s3.pt) | xx MB   | 200    | \*    |
-   | MobileOne S4 | [mobileone_s4_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s4.pt) | xx MB   | 200    | \*    |
+   | Model        | PyTorch Weights                                                                                             | ONNX Weights                                                                                                        | Size    | Epochs | MAE   |
+   | ------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
+   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)               | [resnet18_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18_gaze.onnx)         | 43 MB   | 200    | 12.84 |
+   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)               | [resnet34_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34_gaze.onnx)         | 81.6 MB | 200    | 11.33 |
+   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)               | [resnet50_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50_gaze.onnx)         | 91.3 MB | 200    | 11.34 |
+   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)         | [mobilenetv2_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2_gaze.onnx)   | 9.59 MB | 200    | 13.07 |
+   | MobileOne S0 | [mobileone_s0_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0.pt) | [mobileone_s0_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0_gaze.onnx) | 4.8 MB  | 200    | 12.58 |
+   | MobileOne S1 | [not available](#) | [not available](#) | xx MB   | 200    | \*    |
+   | MobileOne S2 | [not available](#) | [not available](#) | xx MB   | 200    | \*    |
+   | MobileOne S3 | [not available](#) | [not available](#) | xx MB   | 200    | \*    |
+   | MobileOne S4 | [not availablet](#) | [not available](#) | xx MB   | 200    | \*    |
 
    '\*' - soon will be uploaded (due to limited computing resources I cannot publish rest of the weights, but you still can train them with given code).
 
@@ -128,7 +128,7 @@ options:
 ### Evaluation
 
 ```bash
-python evaluate.py --data [dataset_path] --dataset [dataset_name] --weights [weights_path] --arch [architecture_name]
+python evaluate.py --data [dataset_path] --dataset [dataset_name] --weight [weight_path] --arch [architecture_name]
 ```
 
 `evaluate.py` arguments:
@@ -153,25 +153,24 @@ options:
 ### Inference
 
 ```bash
-detect.py --arch [arch_name] --gaze-weights [path_gaze_estimation_weights] --face-weights [face_det_weights] --view --input [input_file] --output [output_file] --dataset [dataset_name]
+inference.py --model [model_name] --weight [model_weight_path] --view --source [source_video / cam_index] --output [output_file] --dataset [dataset_name]
 ```
 
 `detect.py` arguments:
 
 ```
-usage: detect.py [-h] [--arch ARCH] [--gaze-weights GAZE_WEIGHTS] [--face-weights FACE_WEIGHTS] [--view] [--input INPUT] [--output OUTPUT] [--dataset DATASET]
+usage: inference.py [-h] [--model MODEL] [--weight WEIGHT] [--view] [--source SOURCE] [--output OUTPUT] [--dataset DATASET]
 
-Gaze Estimation Inference Arguments
+Gaze estimation inference
 
 options:
-  -h, --help            show this help message and exit
-  --arch ARCH           Model name, default `resnet18`
-  --gaze-weights GAZE_WEIGHTS
-                        Path to gaze esimation model weights
-  --view                Display the inference results
-  --input INPUT         Path to input video file
-  --output OUTPUT       Path to save output file
-  --dataset DATASET     Dataset name to get dataset related configs
+  -h, --help         show this help message and exit
+  --model MODEL      Model name, default `resnet18`
+  --weight WEIGHT    Path to gaze esimation model weights
+  --view             Display the inference results
+  --source SOURCE    Path to source video file or camera index
+  --output OUTPUT    Path to save output file
+  --dataset DATASET  Dataset name to get dataset related configs
 ```
 
 ## Citation

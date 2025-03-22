@@ -4,11 +4,9 @@ import argparse
 import warnings
 import numpy as np
 
-
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
-
 
 from config import data_config
 from utils.helpers import get_model, draw_bbox_gaze
@@ -28,8 +26,9 @@ def parse_args():
         default="resnet34.pt",
         help="Path to gaze esimation model weights"
     )
-    parser.add_argument("--view", action="store_true", help="Display the inference results")
-    parser.add_argument("--input", type=str, default="assets/in_video.mp4", help="Path to input video file")
+    parser.add_argument("--view", action="store_true", default=True, help="Display the inference results")
+    parser.add_argument("--source", type=str, default="assets/in_video.mp4",
+                        help="Path to source video file or camera index")
     parser.add_argument("--output", type=str, default="output.mp4", help="Path to save output file")
     parser.add_argument("--dataset", type=str, default="gaze360", help="Dataset name to get dataset related configs")
     args = parser.parse_args()
@@ -65,7 +64,7 @@ def main(params):
 
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
-    face_detector = uniface.RetinaFace(model="retinaface_mnet_v2") # third-party face detection library
+    face_detector = uniface.RetinaFace(model="retinaface_mnet_v2")  # third-party face detection library
 
     try:
         gaze_detector = get_model(params.model, params.bins, inference_mode=True)
@@ -78,7 +77,7 @@ def main(params):
     gaze_detector.to(device)
     gaze_detector.eval()
 
-    video_source = params.input
+    video_source = params.source
     if video_source.isdigit() or video_source == '0':
         cap = cv2.VideoCapture(int(video_source))
     else:
