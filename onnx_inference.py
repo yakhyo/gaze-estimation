@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     # Initialize Gaze Estimation model
     engine = GazeEstimationONNX(model_path=args.model)
-    detector = uniface.RetinaFace(model="retinaface_mnet_v2")
+    detector = uniface.RetinaFace()
 
     # Optional output writer
     writer = None
