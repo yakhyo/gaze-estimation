@@ -13,8 +13,13 @@
 </div>
 -->
 
-<video controls autoplay loop src="https://github.com/user-attachments/assets/a3af56a9-25af-4827-b716-27f610def59a" muted="false" width="100%"></video>
-Video by Yan Krukau: https://www.pexels.com/video/male-teacher-with-his-students-8617126/
+<!-- <video controls autoplay loop src="https://github.com/user-attachments/assets/a3af56a9-25af-4827-b716-27f610def59a" muted="false" width="100%"></video> -->
+<div align="center">
+ <img src="assets/out_gif.gif" width="100%">
+ <p>
+ Video by Yan Krukau: https://www.pexels.com/video/male-teacher-with-his-students-8617126/
+ </p>
+</div>
 
 This project aims to perform gaze estimation using several deep learning models like ResNet, MobileNet v2, and MobileOne. It supports both classification and regression for predicting gaze direction. Built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net), the project includes additional pre-trained models and refined code for better performance and flexibility.
 
