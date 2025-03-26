@@ -64,7 +64,7 @@ def main(params):
 
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
-    face_detector = uniface.RetinaFace(model="retinaface_mnet_v2")  # third-party face detection library
+    face_detector = uniface.RetinaFace()  # third-party face detection library
 
     try:
         gaze_detector = get_model(params.model, params.bins, inference_mode=True)
