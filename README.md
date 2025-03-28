@@ -5,7 +5,9 @@
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/yakhyo/gaze-estimation)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14257640.svg)](https://doi.org/10.5281/zenodo.14257640)
 
-<h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest updates.</h5>
+<!--
+<h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest updates.</h5> 
+-->
 
 <!--
 <div align="center">
