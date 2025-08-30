@@ -20,7 +20,7 @@ MODEL_FILE_ONNX="${MODEL_NAME}_gaze.onnx"
 
 # Download the model
 wget -O weights/$MODEL_FILE $BASE_URL/$MODEL_FILE
-wget -O weights/$MODEL_FILE $BASE_URL/$MODEL_FILE_ONNX
+wget -O weights/$MODEL_FILE_ONNX $BASE_URL/$MODEL_FILE_ONNX
 
 # Check if the download was successful
 if [ $? -eq 0 ]; then
