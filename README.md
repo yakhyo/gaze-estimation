@@ -55,7 +55,7 @@ pip install -r requirements.txt
 
    a) Download weights from the following links:
 
-   | Model        | PyTorch Weights                                                                                             | ONNX Weights                                                                                                        | Size    | Epochs | MAE   |
+   | Model        | PyTorch Weights                                                                                             | ONNX Weights                                                                                                        | Size    | Epochs | MAE*  |
    | ------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
    | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)               | [resnet18_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18_gaze.onnx)         | 43 MB   | 200    | 12.84 |
    | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)               | [resnet34_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34_gaze.onnx)         | 81.6 MB | 200    | 11.33 |
@@ -68,25 +68,25 @@ pip install -r requirements.txt
    | MobileOne S4 | [not availablet](#)                                                                                         | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
 
    '\*' - soon will be uploaded (due to limited computing resources I cannot publish rest of the weights, but you still can train them with given code).
+   
+   *MAE (Mean Absolute Error) - lower values indicate better accuracy in degrees.
 
    b) Run the command below to download weights to the `weights` directory (Linux):
 
    ```bash
+   # Download specific model weights
    sh download.sh [model_name]
-                  resnet18
-                  resnet34
-                  resnet50
-                  mobilenetv2
-                  mobileone_s0
-                  mobileone_s1
-                  mobileone_s2
-                  mobileone_s3
-                  mobileone_s4
+   # Available models: resnet18, resnet34, resnet50, mobilenetv2, mobileone_s0
+   
+   # Example:
+   sh download.sh resnet18
    ```
 
 ## Usage
 
 ### Datasets
+
+**Note**: Datasets must be downloaded separately and organized as shown below.
 
 Dataset folder structure:
 
@@ -169,10 +169,14 @@ options:
 ### Inference
 
 ```bash
-inference.py --model [model_name] --weight [model_weight_path] --view --source [source_video / cam_index] --output [output_file] --dataset [dataset_name]
+# Run inference on webcam (camera index 0)
+python inference.py --model resnet18 --weight weights/resnet18.pt --view --source 0
+
+# Run inference on video file
+python inference.py --model [model_name] --weight [model_weight_path] --view --source [source_video] --output [output_file] --dataset [dataset_name]
 ```
 
-`detect.py` arguments:
+`inference.py` arguments:
 
 ```
 usage: inference.py [-h] [--model MODEL] [--weight WEIGHT] [--view] [--source SOURCE] [--output OUTPUT] [--dataset DATASET]
