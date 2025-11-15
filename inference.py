@@ -11,7 +11,7 @@ from torchvision import transforms
 from config import data_config
 from utils.helpers import get_model, draw_bbox_gaze
 
-import uniface
+from uniface import RetinaFace
 
 warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -64,7 +64,7 @@ def main(params):
 
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
-    face_detector = uniface.RetinaFace()  # third-party face detection library
+    face_detector = RetinaFace()  # third-party face detection library
 
     try:
         gaze_detector = get_model(params.model, params.bins, inference_mode=True)
@@ -100,8 +100,9 @@ def main(params):
                 logging.info("Failed to obtain frame or EOF")
                 break
 
-            bboxes, keypoints = face_detector.detect(frame)
-            for bbox, keypoint in zip(bboxes, keypoints):
+            faces = face_detector.detect(frame)
+            for face in faces:
+                bbox = face['bbox']
                 x_min, y_min, x_max, y_max = map(int, bbox[:4])
 
                 image = frame[y_min:y_max, x_min:x_max]

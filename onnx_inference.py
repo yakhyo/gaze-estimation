@@ -3,7 +3,7 @@
 # GitHub: https://github.com/yakhyo
 
 import cv2
-import uniface
+from uniface import RetinaFace
 import argparse
 import numpy as np
 import onnxruntime as ort
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     # Initialize Gaze Estimation model
     engine = GazeEstimationONNX(model_path=args.model)
-    detector = uniface.RetinaFace()
+    detector = RetinaFace()
 
     # Optional output writer
     writer = None
@@ -146,9 +146,10 @@ if __name__ == "__main__":
         if not ret:
             break
 
-        bboxes, _ = detector.detect(frame)
+        faces = detector.detect(frame)
 
-        for bbox in bboxes:
+        for face in faces:
+            bbox = face['bbox']
             x_min, y_min, x_max, y_max = map(int, bbox[:4])
             face_crop = frame[y_min:y_max, x_min:x_max]
             if face_crop.size == 0:
