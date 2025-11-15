@@ -9,7 +9,7 @@
 
 
 <!--
-<h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest updates.</h5> 
+<h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for the latest updates.</h5>
 -->
 
 <!--
@@ -36,7 +36,7 @@ This project aims to perform gaze estimation using several deep learning models 
 - [x] **MobileOne (s0-s4)**: [An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040) - Achieves near-instant inference times, ideal for real-time mobile applications.
 - [x] **Face Detection**: [uniface](https://github.com/yakhyo/uniface) - **Uniface** face detection library uses RetinaFace model.
 
-> [!NOTE]  
+> [!NOTE]
 > All models are trained only on **Gaze360** dataset.
 
 ## Installation
@@ -71,7 +71,7 @@ pip install -r requirements.txt
    | MobileOne S4 | [not availablet](#)                                                                                         | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
 
    '\*' - soon will be uploaded (due to limited computing resources I cannot publish rest of the weights, but you still can train them with given code).
-   
+
    *MAE (Mean Absolute Error) - lower values indicate better accuracy in degrees.
 
    b) Run the command below to download weights to the `weights` directory (Linux):
@@ -80,7 +80,7 @@ pip install -r requirements.txt
    # Download specific model weights
    sh download.sh [model_name]
    # Available models: resnet18, resnet34, resnet50, mobilenetv2, mobileone_s0
-   
+
    # Example:
    sh download.sh resnet18
    ```
@@ -265,7 +265,7 @@ Alternatively, in BibTeX format:
 
 1. This project is built on top of [L2CS-Net](https://github.com/Ahmednull/L2CS-Net). Most of the code parts have been re-written for reproducibility and adaptability. Several additional backbones are provided with pre-trained weights.
 2. https://github.com/apple/ml-mobileone
-3. [uniface](https://github.com/yakhyo/uniface) - face detection library used for inference in `detect.py`.
+3. [uniface](https://github.com/yakhyo/uniface) - face detection library used for inference in `inference.py` and `onnx_inference.py`.
 
 <!--
 ## Star History
