@@ -26,7 +26,7 @@ def parse_args():
         default="resnet34.pt",
         help="Path to gaze esimation model weights"
     )
-    parser.add_argument("--view", action="store_true", default=True, help="Display the inference results")
+    parser.add_argument("--view", action="store_true", default=False, help="Display the inference results")
     parser.add_argument("--source", type=str, default="assets/in_video.mp4",
                         help="Path to source video file or camera index")
     parser.add_argument("--output", type=str, default="output.mp4", help="Path to save output file")
@@ -135,7 +135,8 @@ def main(params):
     cap.release()
     if params.output:
         out.release()
-    cv2.destroyAllWindows()
+    if params.view:
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
