@@ -5,3 +5,6 @@ services:
       dockerfile: Dockerfile
     stdin_open: true
     tty: true
+    volumes:
+      - ./data:/app/data
+      - ./weights:/app/weights
