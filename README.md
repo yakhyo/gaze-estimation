@@ -78,6 +78,12 @@ docker compose run --build gaze bash
    sh download.sh resnet18
    ```
 
+3. Test inference:
+
+```bash
+python inference.py --model resnet18 --weight weights/resnet18.pt  --source assets/in_video.mp4 --output data/result.mp4
+```
+
 ## Manual Installation
 
 1. Clone the repository:
@@ -123,6 +129,12 @@ pip install -r requirements.txt
    # Example:
    sh download.sh resnet18
    ```
+
+4. Test inference:
+
+```bash
+python inference.py --model resnet18 --weight weights/resnet18.pt  --source assets/in_video.mp4 --output data/result.mp4
+```
 
 ## Usage
 
