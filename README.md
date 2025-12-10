@@ -39,7 +39,54 @@ This project aims to perform gaze estimation using several deep learning models 
 > [!NOTE]
 > All models are trained only on **Gaze360** dataset.
 
-## Installation
+## Installation with Docker
+
+1. Start the container:
+
+```bash
+docker compose run --build gaze bash
+```
+
+Contents in folder data/ and weights/ will be shared between host and the container.
+
+2. Download weight files:
+
+   a) Download weights from the following links:
+
+   | Model        | PyTorch Weights                                                                                             | ONNX Weights                                                                                                        | Size    | Epochs | MAE*  |
+   | ------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------- | ------ | ----- |
+   | ResNet-18    | [resnet18.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18.pt)               | [resnet18_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet18_gaze.onnx)         | 43 MB   | 200    | 12.84 |
+   | ResNet-34    | [resnet34.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34.pt)               | [resnet34_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet34_gaze.onnx)         | 81.6 MB | 200    | 11.33 |
+   | ResNet-50    | [resnet50.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50.pt)               | [resnet50_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/resnet50_gaze.onnx)         | 91.3 MB | 200    | 11.34 |
+   | MobileNet V2 | [mobilenetv2.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2.pt)         | [mobilenetv2_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobilenetv2_gaze.onnx)   | 9.59 MB | 200    | 13.07 |
+   | MobileOne S0 | [mobileone_s0_fused.pt](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0.pt) | [mobileone_s0_gaze.onnx](https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1/mobileone_s0_gaze.onnx) | 4.8 MB  | 200    | 12.58 |
+   | MobileOne S1 | [not available](#)                                                                                          | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+   | MobileOne S2 | [not available](#)                                                                                          | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+   | MobileOne S3 | [not available](#)                                                                                          | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+   | MobileOne S4 | [not availablet](#)                                                                                         | [not available](#)                                                                                                  | xx MB   | 200    | \*    |
+
+   '\*' - soon will be uploaded (due to limited computing resources I cannot publish rest of the weights, but you still can train them with given code).
+
+   *MAE (Mean Absolute Error) - lower values indicate better accuracy in degrees.
+
+   b) Run the command below to download weights to the `weights` directory (Linux):
+
+   ```bash
+   # Download specific model weights
+   sh download.sh [model_name]
+   # Available models: resnet18, resnet34, resnet50, mobilenetv2, mobileone_s0
+
+   # Example:
+   sh download.sh resnet18
+   ```
+
+3. Test inference:
+
+```bash
+python inference.py --model resnet18 --weight weights/resnet18.pt  --source assets/in_video.mp4 --output data/result.mp4
+```
+
+## Manual Installation
 
 1. Clone the repository:
 
@@ -84,6 +131,12 @@ pip install -r requirements.txt
    # Example:
    sh download.sh resnet18
    ```
+
+4. Test inference:
+
+```bash
+python inference.py --model resnet18 --weight weights/resnet18.pt  --source assets/in_video.mp4 --output data/result.mp4
+```
 
 ## Usage
 
@@ -239,6 +292,7 @@ options:
   -h, --help       show this help message and exit
   --source SOURCE  Video path or camera index (e.g., 0 for webcam)
   --model MODEL    Path to ONNX model
+  --view             Display the inference results
   --output OUTPUT  Path to save output video (optional)
 ```
 

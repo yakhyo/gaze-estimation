@@ -100,6 +100,7 @@ def parse_args():
         required=True,
         help="Video path or camera index (e.g., 0 for webcam)"
     )
+    parser.add_argument("--view", action="store_true", default=False, help="Display the inference results")
     parser.add_argument(
         "--model",
         type=str,
@@ -161,11 +162,13 @@ if __name__ == "__main__":
         if writer:
             writer.write(frame)
 
-        cv2.imshow("Gaze Estimation", frame)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        if args.view:
+            cv2.imshow("Gaze Estimation", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
 
     cap.release()
     if writer:
         writer.release()
-    cv2.destroyAllWindows()
+    if args.view:
+        cv2.destroyAllWindows()
