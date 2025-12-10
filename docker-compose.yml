@@ -1,0 +1,7 @@
+services:
+  gaze:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
