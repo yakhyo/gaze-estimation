@@ -47,6 +47,8 @@ This project aims to perform gaze estimation using several deep learning models 
 docker compose run --build gaze bash
 ```
 
+Contents in folder data/ and weights/ will be shared between host and the container.
+
 2. Download weight files:
 
    a) Download weights from the following links:
