@@ -290,6 +290,7 @@ options:
   -h, --help       show this help message and exit
   --source SOURCE  Video path or camera index (e.g., 0 for webcam)
   --model MODEL    Path to ONNX model
+  --view             Display the inference results
   --output OUTPUT  Path to save output video (optional)
 ```
 
