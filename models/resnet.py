@@ -30,9 +30,7 @@ def conv3x3(
 
 def conv1x1(in_channels: int, out_channels: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
-    return nn.Conv2d(
-        in_channels, out_channels, kernel_size=1, stride=stride, bias=False
-    )
+    return nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -160,27 +158,18 @@ class ResNet(nn.Module):
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
             raise ValueError(
-                "replace_stride_with_dilation should be None "
-                f"or a 3-element tuple, got {replace_stride_with_dilation}"
+                f"replace_stride_with_dilation should be None or a 3-element tuple, got {replace_stride_with_dilation}"
             )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(
-            3, self.in_channels, kernel_size=7, stride=2, padding=3, bias=False
-        )
+        self.conv1 = nn.Conv2d(3, self.in_channels, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = norm_layer(self.in_channels)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(
-            block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
-        )
-        self.layer3 = self._make_layer(
-            block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
-        )
-        self.layer4 = self._make_layer(
-            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
-        )
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         # yaw and pitch
@@ -275,9 +264,7 @@ def load_filtered_state_dict(model, state_dict):
         state_dict: A dictionary of parameters to load into the model.
     """
     current_model_dict = model.state_dict()
-    filtered_state_dict = {
-        key: value for key, value in state_dict.items() if key in current_model_dict
-    }
+    filtered_state_dict = {key: value for key, value in state_dict.items() if key in current_model_dict}
     current_model_dict.update(filtered_state_dict)
     model.load_state_dict(current_model_dict)
 
@@ -298,9 +285,7 @@ def _resnet(
     return model
 
 
-def resnet18(
-    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
-) -> ResNet:
+def resnet18(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
     if pretrained:
         weights = ResNet18_Weights.DEFAULT
     else:
@@ -308,9 +293,7 @@ def resnet18(
     return _resnet(BasicBlock, [2, 2, 2, 2], weights, progress, **kwargs)
 
 
-def resnet34(
-    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
-) -> ResNet:
+def resnet34(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
     if pretrained:
         weights = ResNet34_Weights.DEFAULT
     else:
@@ -318,9 +301,7 @@ def resnet34(
     return _resnet(BasicBlock, [3, 4, 6, 3], weights, progress, **kwargs)
 
 
-def resnet50(
-    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
-) -> ResNet:
+def resnet50(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
     if pretrained:
         weights = ResNet50_Weights.DEFAULT
     else:

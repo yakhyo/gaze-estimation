@@ -18,27 +18,21 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(description="Gaze estimation training")
-    parser.add_argument(
-        "--data", type=str, default="data", help="Directory path for gaze images."
-    )
+    parser.add_argument("--data", type=str, default="data", help="Directory path for gaze images.")
     parser.add_argument(
         "--dataset",
         type=str,
         default="gaze360",
         help="Dataset name, available `gaze360`, `mpiigaze`.",
     )
-    parser.add_argument(
-        "--output", type=str, default="output/", help="Path of output models."
-    )
+    parser.add_argument("--output", type=str, default="output/", help="Path of output models.")
     parser.add_argument(
         "--checkpoint",
         type=str,
         default="",
         help="Path to checkpoint for resuming training.",
     )
-    parser.add_argument(
-        "--num-epochs", type=int, default=100, help="Maximum number of training epochs."
-    )
+    parser.add_argument("--num-epochs", type=int, default=100, help="Maximum number of training epochs.")
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size.")
     parser.add_argument(
         "--arch",
@@ -46,13 +40,9 @@ def parse_args():
         default="resnet18",
         help="Network architecture, currently available: resnet18/34/50, mobilenetv2, mobileone_s0-s4.",
     )
-    parser.add_argument(
-        "--alpha", type=float, default=1, help="Regression loss coefficient."
-    )
+    parser.add_argument("--alpha", type=float, default=1, help="Regression loss coefficient.")
     parser.add_argument("--lr", type=float, default=0.00001, help="Base learning rate.")
-    parser.add_argument(
-        "--num-workers", type=int, default=8, help="Number of workers for data loading."
-    )
+    parser.add_argument("--num-workers", type=int, default=8, help="Number of workers for data loading.")
 
     args = parser.parse_args()
 
@@ -63,9 +53,7 @@ def parse_args():
         args.binwidth = dataset_config["binwidth"]
         args.angle = dataset_config["angle"]
     else:
-        raise ValueError(
-            f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}"
-        )
+        raise ValueError(f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}")
 
     return args
 
@@ -97,9 +85,7 @@ def initialize_model(params, device):
                     state[k] = v.to(device)
 
         start_epoch = checkpoint["epoch"]
-        logging.info(
-            f"Resumed training from {params.checkpoint}, starting at epoch {start_epoch + 1}"
-        )
+        logging.info(f"Resumed training from {params.checkpoint}, starting at epoch {start_epoch + 1}")
 
     return model.to(device), optimizer, start_epoch
 
@@ -158,9 +144,7 @@ def train_one_epoch(
         pitch, yaw = F.softmax(pitch, dim=1), F.softmax(yaw, dim=1)
 
         # Mapping from binned (0 to 90) to angels (-180 to 180)
-        pitch_predicted = (
-            torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
-        )
+        pitch_predicted = torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
         yaw_predicted = torch.sum(yaw * idx_tensor, 1) * params.binwidth - params.angle
 
         # Mean Squared Error Loss

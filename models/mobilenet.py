@@ -56,9 +56,7 @@ class Conv2dNormActivation(torch.nn.Sequential):
 
 
 class InvertedResidual(nn.Module):
-    def __init__(
-        self, in_planes: int, out_planes: int, stride: int, expand_ratio: int
-    ) -> None:
+    def __init__(self, in_planes: int, out_planes: int, stride: int, expand_ratio: int) -> None:
         super().__init__()
         self.stride = stride
         if stride not in [1, 2]:
@@ -70,11 +68,7 @@ class InvertedResidual(nn.Module):
         layers: List[nn.Module] = []
         if expand_ratio != 1:
             # pw
-            layers.append(
-                Conv2dNormActivation(
-                    in_planes, hidden_dim, kernel_size=1, activation_layer=nn.ReLU6
-                )
-            )
+            layers.append(Conv2dNormActivation(in_planes, hidden_dim, kernel_size=1, activation_layer=nn.ReLU6))
         layers.extend(
             [
                 # dw
@@ -141,32 +135,21 @@ class MobileNetV2(nn.Module):
             ]
 
         # only check the first element, assuming user knows t,c,n,s are required
-        if (
-            len(inverted_residual_setting) == 0
-            or len(inverted_residual_setting[0]) != 4
-        ):
+        if len(inverted_residual_setting) == 0 or len(inverted_residual_setting[0]) != 4:
             raise ValueError(
                 f"inverted_residual_setting should be non-empty or a 4-element list, got {inverted_residual_setting}"
             )
 
         # building first layer
         input_channel = _make_divisible(input_channel * width_mult, round_nearest)
-        self.last_channel = _make_divisible(
-            last_channel * max(1.0, width_mult), round_nearest
-        )
-        features: List[nn.Module] = [
-            Conv2dNormActivation(3, input_channel, stride=2, activation_layer=nn.ReLU6)
-        ]
+        self.last_channel = _make_divisible(last_channel * max(1.0, width_mult), round_nearest)
+        features: List[nn.Module] = [Conv2dNormActivation(3, input_channel, stride=2, activation_layer=nn.ReLU6)]
         # building inverted residual blocks
         for t, c, n, s in inverted_residual_setting:
             output_channel = _make_divisible(c * width_mult, round_nearest)
             for i in range(n):
                 stride = s if i == 0 else 1
-                features.append(
-                    InvertedResidual(
-                        input_channel, output_channel, stride, expand_ratio=t
-                    )
-                )
+                features.append(InvertedResidual(input_channel, output_channel, stride, expand_ratio=t))
                 input_channel = output_channel
         # building last several layers
         features.append(
@@ -226,16 +209,12 @@ def load_filtered_state_dict(model, state_dict):
         state_dict: A dictionary of parameters to load into the model.
     """
     current_model_dict = model.state_dict()
-    filtered_state_dict = {
-        key: value for key, value in state_dict.items() if key in current_model_dict
-    }
+    filtered_state_dict = {key: value for key, value in state_dict.items() if key in current_model_dict}
     current_model_dict.update(filtered_state_dict)
     model.load_state_dict(current_model_dict)
 
 
-def mobilenet_v2(
-    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
-) -> MobileNetV2:
+def mobilenet_v2(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> MobileNetV2:
     if pretrained:
         weights = MobileNet_V2_Weights.IMAGENET1K_V1
     else:

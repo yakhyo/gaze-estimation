@@ -44,9 +44,7 @@ def parse_arguments():
 def onnx_export(params):
     # Get dataset config for bins
     if params.dataset not in data_config:
-        raise KeyError(
-            f"Unknown dataset: {params.dataset}. Available options: {list(data_config.keys())}"
-        )
+        raise KeyError(f"Unknown dataset: {params.dataset}. Available options: {list(data_config.keys())}")
     bins = data_config[params.dataset]["bins"]
 
     # Set device

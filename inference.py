@@ -19,9 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gaze estimation inference")
-    parser.add_argument(
-        "--model", type=str, default="resnet34", help="Model name, default `resnet18`"
-    )
+    parser.add_argument("--model", type=str, default="resnet34", help="Model name, default `resnet18`")
     parser.add_argument(
         "--weight",
         type=str,
@@ -40,9 +38,7 @@ def parse_args():
         default="assets/in_video.mp4",
         help="Path to source video file or camera index",
     )
-    parser.add_argument(
-        "--output", type=str, default="output.mp4", help="Path to save output file"
-    )
+    parser.add_argument("--output", type=str, default="output.mp4", help="Path to save output file")
     parser.add_argument(
         "--dataset",
         type=str,
@@ -58,9 +54,7 @@ def parse_args():
         args.binwidth = dataset_config["binwidth"]
         args.angle = dataset_config["angle"]
     else:
-        raise ValueError(
-            f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}"
-        )
+        raise ValueError(f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}")
 
     return args
 
@@ -94,9 +88,7 @@ def main(params):
         gaze_detector.load_state_dict(state_dict)
         logging.info("Gaze Estimation model weights loaded.")
     except Exception as e:
-        logging.info(
-            f"Exception occured while loading pre-trained weights of gaze estimation model. Exception: {e}"
-        )
+        logging.info(f"Exception occured while loading pre-trained weights of gaze estimation model. Exception: {e}")
         raise FileNotFoundError(f"Model weights not found at {params.weight}") from e
 
     gaze_detector.to(device)
@@ -112,9 +104,7 @@ def main(params):
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(
-            params.output, fourcc, cap.get(cv2.CAP_PROP_FPS), (width, height)
-        )
+        out = cv2.VideoWriter(params.output, fourcc, cap.get(cv2.CAP_PROP_FPS), (width, height))
 
     if not cap.isOpened():
         raise IOError("Cannot open webcam")
@@ -144,14 +134,8 @@ def main(params):
                 )
 
                 # Mapping from binned (0 to 90) to angles (-180 to 180) or (0 to 28) to angles (-42, 42)
-                pitch_predicted = (
-                    torch.sum(pitch_predicted * idx_tensor, dim=1) * params.binwidth
-                    - params.angle
-                )
-                yaw_predicted = (
-                    torch.sum(yaw_predicted * idx_tensor, dim=1) * params.binwidth
-                    - params.angle
-                )
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
+                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
 
                 # Degrees to Radians
                 pitch_predicted = np.radians(pitch_predicted.cpu())

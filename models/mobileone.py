@@ -139,9 +139,7 @@ class MobileOneBlock(nn.Module):
         else:
             # Re-parameterizable skip connection
             self.rbr_skip = (
-                nn.BatchNorm2d(num_features=in_channels)
-                if out_channels == in_channels and stride == 1
-                else None
+                nn.BatchNorm2d(num_features=in_channels) if out_channels == in_channels and stride == 1 else None
             )
 
             # Re-parameterizable conv branches
@@ -277,9 +275,7 @@ class MobileOneBlock(nn.Module):
                     device=branch.weight.device,
                 )
                 for i in range(self.in_channels):
-                    kernel_value[
-                        i, i % input_dim, self.kernel_size // 2, self.kernel_size // 2
-                    ] = 1
+                    kernel_value[i, i % input_dim, self.kernel_size // 2, self.kernel_size // 2] = 1
                 self.id_tensor = kernel_value
             kernel = self.id_tensor
             running_mean = branch.running_mean
@@ -365,12 +361,8 @@ class MobileOne(nn.Module):
             inference_mode=self.inference_mode,
         )
         self.cur_layer_idx = 1
-        self.stage1 = self._make_stage(
-            int(64 * width_multipliers[0]), num_blocks_per_stage[0], num_se_blocks=0
-        )
-        self.stage2 = self._make_stage(
-            int(128 * width_multipliers[1]), num_blocks_per_stage[1], num_se_blocks=0
-        )
+        self.stage1 = self._make_stage(int(64 * width_multipliers[0]), num_blocks_per_stage[0], num_se_blocks=0)
+        self.stage2 = self._make_stage(int(128 * width_multipliers[1]), num_blocks_per_stage[1], num_se_blocks=0)
         self.stage3 = self._make_stage(
             int(256 * width_multipliers[2]),
             num_blocks_per_stage[2],
@@ -389,9 +381,7 @@ class MobileOne(nn.Module):
 
         # self.linear = nn.Linear(int(512 * width_multipliers[3]), num_classes)
 
-    def _make_stage(
-        self, planes: int, num_blocks: int, num_se_blocks: int
-    ) -> nn.Sequential:
+    def _make_stage(self, planes: int, num_blocks: int, num_se_blocks: int) -> nn.Sequential:
         """
         Build a stage of the MobileOne model.
 
@@ -521,9 +511,7 @@ def load_filtered_state_dict(model, state_dict):
         state_dict: A dictionary of parameters to load into the model.
     """
     current_model_dict = model.state_dict()
-    filtered_state_dict = {
-        key: value for key, value in state_dict.items() if key in current_model_dict
-    }
+    filtered_state_dict = {key: value for key, value in state_dict.items() if key in current_model_dict}
     current_model_dict.update(filtered_state_dict)
     model.load_state_dict(current_model_dict)
 
@@ -566,33 +554,23 @@ def create_mobileone_model(
 
 
 def mobileone_s0(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(
-        MOBILEONE_CONFIGS["mobileone_s0"], pretrained, num_classes, inference_mode
-    )
+    return create_mobileone_model(MOBILEONE_CONFIGS["mobileone_s0"], pretrained, num_classes, inference_mode)
 
 
 def mobileone_s1(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(
-        MOBILEONE_CONFIGS["mobileone_s1"], pretrained, num_classes, inference_mode
-    )
+    return create_mobileone_model(MOBILEONE_CONFIGS["mobileone_s1"], pretrained, num_classes, inference_mode)
 
 
 def mobileone_s2(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(
-        MOBILEONE_CONFIGS["mobileone_s2"], pretrained, num_classes, inference_mode
-    )
+    return create_mobileone_model(MOBILEONE_CONFIGS["mobileone_s2"], pretrained, num_classes, inference_mode)
 
 
 def mobileone_s3(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(
-        MOBILEONE_CONFIGS["mobileone_s3"], pretrained, num_classes, inference_mode
-    )
+    return create_mobileone_model(MOBILEONE_CONFIGS["mobileone_s3"], pretrained, num_classes, inference_mode)
 
 
 def mobileone_s4(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(
-        MOBILEONE_CONFIGS["mobileone_s4"], pretrained, num_classes, inference_mode
-    )
+    return create_mobileone_model(MOBILEONE_CONFIGS["mobileone_s4"], pretrained, num_classes, inference_mode)
 
 
 if __name__ == "__main__":
