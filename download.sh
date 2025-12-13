@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the base URL for the downloads
-BASE_URL="https://github.com/yakhyo/gaze-estimation/releases/download/v0.0.1"
+BASE_URL="https://github.com/yakhyo/gaze-estimation/releases/download/weights"
 
 # Create the weights directory if it does not exist
 mkdir -p weights
