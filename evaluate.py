@@ -13,25 +13,40 @@ from config import data_config
 from utils.helpers import angular_error, gaze_to_3d, get_dataloader, get_model
 
 import warnings
+
 warnings.filterwarnings("ignore")
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(description="Gaze estimation evaluation")
-    parser.add_argument("--data", type=str, default="data/Gaze360", help="Directory path for gaze images.")
-    parser.add_argument("--dataset", type=str, default="gaze360", help="Dataset name, available `gaze360`, `mpiigaze`")
-    parser.add_argument("--weight", type=str, default="", help="Path to model weight for evaluation.")
+    parser.add_argument(
+        "--data",
+        type=str,
+        default="data/Gaze360",
+        help="Directory path for gaze images.",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="gaze360",
+        help="Dataset name, available `gaze360`, `mpiigaze`",
+    )
+    parser.add_argument(
+        "--weight", type=str, default="", help="Path to model weight for evaluation."
+    )
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size.")
     parser.add_argument(
         "--arch",
         type=str,
         default="resnet18",
-        help="Network architecture, currently available: resnet18/34/50, mobilenetv2, mobileone_s0-s4."
+        help="Network architecture, currently available: resnet18/34/50, mobilenetv2, mobileone_s0-s4.",
     )
-    parser.add_argument("--num-workers", type=int, default=8, help="Number of workers for data loading.")
+    parser.add_argument(
+        "--num-workers", type=int, default=8, help="Number of workers for data loading."
+    )
 
     args = parser.parse_args()
 
@@ -42,7 +57,9 @@ def parse_args():
         args.binwidth = dataset_config["binwidth"]
         args.angle = dataset_config["angle"]
     else:
-        raise ValueError(f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}")
+        raise ValueError(
+            f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}"
+        )
 
     return args
 
@@ -63,7 +80,9 @@ def evaluate(params, model, data_loader, idx_tensor, device):
     average_error = 0
     total_samples = 0
 
-    for images, labels_gaze, regression_labels_gaze, _ in tqdm(data_loader, total=len(data_loader)):
+    for images, labels_gaze, regression_labels_gaze, _ in tqdm(
+        data_loader, total=len(data_loader)
+    ):
         total_samples += regression_labels_gaze.size(0)
         images = images.to(device)
 
@@ -79,8 +98,12 @@ def evaluate(params, model, data_loader, idx_tensor, device):
         yaw_predicted = F.softmax(yaw, dim=1)
 
         # Mapping from binned (0 to 90) to angles (-180 to 180) or (0 to 28) to angles (-42, 42)
-        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * params.binwidth - params.angle
-        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * params.binwidth - params.angle
+        pitch_predicted = (
+            torch.sum(pitch_predicted * idx_tensor, 1) * params.binwidth - params.angle
+        )
+        yaw_predicted = (
+            torch.sum(yaw_predicted * idx_tensor, 1) * params.binwidth - params.angle
+        )
 
         pitch_predicted = np.radians(pitch_predicted.cpu())
         yaw_predicted = np.radians(yaw_predicted.cpu())
@@ -91,7 +114,7 @@ def evaluate(params, model, data_loader, idx_tensor, device):
     logging.info(
         f"Dataset: {params.dataset} | "
         f"Total Number of Samples: {total_samples} | "
-        f"Mean Angular Error: {average_error/total_samples}"
+        f"Mean Angular Error: {average_error / total_samples}"
     )
 
 
@@ -104,7 +127,9 @@ def main():
     model = get_model(params.arch, params.bins, inference_mode=True)
 
     if os.path.exists(params.weight):
-        model.load_state_dict(torch.load(params.weight, map_location=device, weights_only=True))
+        model.load_state_dict(
+            torch.load(params.weight, map_location=device, weights_only=True)
+        )
     else:
         raise ValueError(f"Model weight not found at {params.weight}")
 
@@ -117,5 +142,5 @@ def main():
     evaluate(params, model, test_loader, idx_tensor, device)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

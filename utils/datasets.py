@@ -8,11 +8,18 @@ from torch.utils.data import Dataset
 
 
 class Gaze360(Dataset):
-    def __init__(self, root: str, transform=None, angle: int = 180, binwidth: int = 4, mode: str = 'train'):
+    def __init__(
+        self,
+        root: str,
+        transform=None,
+        angle: int = 180,
+        binwidth: int = 4,
+        mode: str = "train",
+    ):
         self.labels_dir = os.path.join(root, "Label")
         self.images_dir = os.path.join(root, "Image")
 
-        if mode in ['train', 'test', 'val']:
+        if mode in ["train", "test", "val"]:
             labels_file = os.path.join(self.labels_dir, f"{mode}.label")
         else:
             raise ValueError(f"{mode} must be in ['train','test', 'val']")
@@ -36,7 +43,9 @@ class Gaze360(Dataset):
                     self.lines.append(line)
 
         removed_items = self.orig_list_len - len(self.lines)
-        print(f"{removed_items} items removed from dataset that have an angle > {self.angle}")
+        print(
+            f"{removed_items} items removed from dataset that have an angle > {self.angle}"
+        )
 
     def __len__(self):
         return len(self.lines)
@@ -71,7 +80,10 @@ class MPIIGaze(Dataset):
         self.labels_dir = os.path.join(root, "Label")
         self.images_dir = os.path.join(root, "Image")
 
-        label_files = [os.path.join(self.labels_dir, label) for label in os.listdir(self.labels_dir)]
+        label_files = [
+            os.path.join(self.labels_dir, label)
+            for label in os.listdir(self.labels_dir)
+        ]
 
         self.transform = transform
         self.orig_list_len = 0
@@ -92,7 +104,9 @@ class MPIIGaze(Dataset):
                         self.lines.append(line)
 
         removed_items = self.orig_list_len - len(self.lines)
-        print(f"{removed_items} items removed from dataset that have an angle > {self.angle}")
+        print(
+            f"{removed_items} items removed from dataset that have an angle > {self.angle}"
+        )
 
     def __len__(self):
         return len(self.lines)

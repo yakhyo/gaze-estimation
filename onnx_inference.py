@@ -30,10 +30,11 @@ class GazeEstimationONNX:
         """
         self.session = session
         if self.session is None:
-            assert model_path is not None, "Model path is required for the first time initialization."
+            assert model_path is not None, (
+                "Model path is required for the first time initialization."
+            )
             self.session = ort.InferenceSession(
-                model_path,
-                providers=["CPUExecutionProvider", "CUDAExecutionProvider"]
+                model_path, providers=["CPUExecutionProvider", "CUDAExecutionProvider"]
             )
 
         self._bins = 90
@@ -55,7 +56,9 @@ class GazeEstimationONNX:
         output_names = [output.name for output in outputs]
 
         self.output_names = output_names
-        assert len(output_names) == 2, "Expected 2 output nodes, got {}".format(len(output_names))
+        assert len(output_names) == 2, "Expected 2 output nodes, got {}".format(
+            len(output_names)
+        )
 
     def preprocess(self, image: np.ndarray) -> np.ndarray:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -76,12 +79,20 @@ class GazeEstimationONNX:
         e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
         return e_x / e_x.sum(axis=1, keepdims=True)
 
-    def decode(self, pitch_logits: np.ndarray, yaw_logits: np.ndarray) -> Tuple[float, float]:
+    def decode(
+        self, pitch_logits: np.ndarray, yaw_logits: np.ndarray
+    ) -> Tuple[float, float]:
         pitch_probs = self.softmax(pitch_logits)
         yaw_probs = self.softmax(yaw_logits)
 
-        pitch = np.sum(pitch_probs * self.idx_tensor, axis=1) * self._binwidth - self._angle_offset
-        yaw = np.sum(yaw_probs * self.idx_tensor, axis=1) * self._binwidth - self._angle_offset
+        pitch = (
+            np.sum(pitch_probs * self.idx_tensor, axis=1) * self._binwidth
+            - self._angle_offset
+        )
+        yaw = (
+            np.sum(yaw_probs * self.idx_tensor, axis=1) * self._binwidth
+            - self._angle_offset
+        )
 
         return np.radians(pitch[0]), np.radians(yaw[0])
 
@@ -98,19 +109,11 @@ def parse_args():
         "--source",
         type=str,
         required=True,
-        help="Video path or camera index (e.g., 0 for webcam)"
+        help="Video path or camera index (e.g., 0 for webcam)",
     )
+    parser.add_argument("--model", type=str, required=True, help="Path to ONNX model")
     parser.add_argument(
-        "--model",
-        type=str,
-        required=True,
-        help="Path to ONNX model"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        help="Path to save output video (optional)"
+        "--output", type=str, default=None, help="Path to save output video (optional)"
     )
     return parser.parse_args()
 
@@ -149,7 +152,7 @@ if __name__ == "__main__":
         faces = detector.detect(frame)
 
         for face in faces:
-            bbox = face['bbox']
+            bbox = face["bbox"]
             x_min, y_min, x_max, y_max = map(int, bbox[:4])
             face_crop = frame[y_min:y_max, x_min:x_max]
             if face_crop.size == 0:

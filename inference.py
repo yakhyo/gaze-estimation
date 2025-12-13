@@ -14,23 +14,41 @@ from utils.helpers import get_model, draw_bbox_gaze
 from uniface import RetinaFace
 
 warnings.filterwarnings("ignore")
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gaze estimation inference")
-    parser.add_argument("--model", type=str, default="resnet34", help="Model name, default `resnet18`")
+    parser.add_argument(
+        "--model", type=str, default="resnet34", help="Model name, default `resnet18`"
+    )
     parser.add_argument(
         "--weight",
         type=str,
         default="resnet34.pt",
-        help="Path to gaze esimation model weights"
+        help="Path to gaze esimation model weights",
     )
-    parser.add_argument("--view", action="store_true", default=True, help="Display the inference results")
-    parser.add_argument("--source", type=str, default="assets/in_video.mp4",
-                        help="Path to source video file or camera index")
-    parser.add_argument("--output", type=str, default="output.mp4", help="Path to save output file")
-    parser.add_argument("--dataset", type=str, default="gaze360", help="Dataset name to get dataset related configs")
+    parser.add_argument(
+        "--view",
+        action="store_true",
+        default=True,
+        help="Display the inference results",
+    )
+    parser.add_argument(
+        "--source",
+        type=str,
+        default="assets/in_video.mp4",
+        help="Path to source video file or camera index",
+    )
+    parser.add_argument(
+        "--output", type=str, default="output.mp4", help="Path to save output file"
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="gaze360",
+        help="Dataset name to get dataset related configs",
+    )
     args = parser.parse_args()
 
     # Override default values based on selected dataset
@@ -40,19 +58,23 @@ def parse_args():
         args.binwidth = dataset_config["binwidth"]
         args.angle = dataset_config["angle"]
     else:
-        raise ValueError(f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}")
+        raise ValueError(
+            f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}"
+        )
 
     return args
 
 
 def pre_process(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    transform = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize(448),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    transform = transforms.Compose(
+        [
+            transforms.ToPILImage(),
+            transforms.Resize(448),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
     image = transform(image)
     image_batch = image.unsqueeze(0)
@@ -72,13 +94,16 @@ def main(params):
         gaze_detector.load_state_dict(state_dict)
         logging.info("Gaze Estimation model weights loaded.")
     except Exception as e:
-        logging.info(f"Exception occured while loading pre-trained weights of gaze estimation model. Exception: {e}")
+        logging.info(
+            f"Exception occured while loading pre-trained weights of gaze estimation model. Exception: {e}"
+        )
+        raise FileNotFoundError(f"Model weights not found at {params.weight}") from e
 
     gaze_detector.to(device)
     gaze_detector.eval()
 
     video_source = params.source
-    if video_source.isdigit() or video_source == '0':
+    if video_source.isdigit() or video_source == "0":
         cap = cv2.VideoCapture(int(video_source))
     else:
         cap = cv2.VideoCapture(video_source)
@@ -87,7 +112,9 @@ def main(params):
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(params.output, fourcc, cap.get(cv2.CAP_PROP_FPS), (width, height))
+        out = cv2.VideoWriter(
+            params.output, fourcc, cap.get(cv2.CAP_PROP_FPS), (width, height)
+        )
 
     if not cap.isOpened():
         raise IOError("Cannot open webcam")
@@ -102,7 +129,7 @@ def main(params):
 
             faces = face_detector.detect(frame)
             for face in faces:
-                bbox = face['bbox']
+                bbox = face["bbox"]
                 x_min, y_min, x_max, y_max = map(int, bbox[:4])
 
                 image = frame[y_min:y_max, x_min:x_max]
@@ -111,11 +138,20 @@ def main(params):
 
                 pitch, yaw = gaze_detector(image)
 
-                pitch_predicted, yaw_predicted = F.softmax(pitch, dim=1), F.softmax(yaw, dim=1)
+                pitch_predicted, yaw_predicted = (
+                    F.softmax(pitch, dim=1),
+                    F.softmax(yaw, dim=1),
+                )
 
                 # Mapping from binned (0 to 90) to angles (-180 to 180) or (0 to 28) to angles (-42, 42)
-                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
-                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
+                pitch_predicted = (
+                    torch.sum(pitch_predicted * idx_tensor, dim=1) * params.binwidth
+                    - params.angle
+                )
+                yaw_predicted = (
+                    torch.sum(yaw_predicted * idx_tensor, dim=1) * params.binwidth
+                    - params.angle
+                )
 
                 # Degrees to Radians
                 pitch_predicted = np.radians(pitch_predicted.cpu())
@@ -128,8 +164,8 @@ def main(params):
                 out.write(frame)
 
             if params.view:
-                cv2.imshow('Demo', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                cv2.imshow("Demo", frame)
+                if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
 
     cap.release()

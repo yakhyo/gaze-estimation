@@ -17,32 +17,44 @@ from models import (
     mobileone_s1,
     mobileone_s2,
     mobileone_s3,
-    mobileone_s4
+    mobileone_s4,
 )
 
 
 def get_model(arch, bins, pretrained=False, inference_mode=False):
     """Return the model based on the specified architecture."""
-    if arch == 'resnet18':
+    if arch == "resnet18":
         model = resnet18(pretrained=pretrained, num_classes=bins)
-    elif arch == 'resnet34':
+    elif arch == "resnet34":
         model = resnet34(pretrained=pretrained, num_classes=bins)
-    elif arch == 'resnet50':
+    elif arch == "resnet50":
         model = resnet50(pretrained=pretrained, num_classes=bins)
     elif arch == "mobilenetv2":
         model = mobilenet_v2(pretrained=pretrained, num_classes=bins)
     elif arch == "mobileone_s0":
-        model = mobileone_s0(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
+        model = mobileone_s0(
+            pretrained=pretrained, num_classes=bins, inference_mode=inference_mode
+        )
     elif arch == "mobileone_s1":
-        model = mobileone_s1(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
+        model = mobileone_s1(
+            pretrained=pretrained, num_classes=bins, inference_mode=inference_mode
+        )
     elif arch == "mobileone_s2":
-        model = mobileone_s2(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
+        model = mobileone_s2(
+            pretrained=pretrained, num_classes=bins, inference_mode=inference_mode
+        )
     elif arch == "mobileone_s3":
-        model = mobileone_s3(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
+        model = mobileone_s3(
+            pretrained=pretrained, num_classes=bins, inference_mode=inference_mode
+        )
     elif arch == "mobileone_s4":
-        model = mobileone_s4(pretrained=pretrained, num_classes=bins, inference_mode=inference_mode)
+        model = mobileone_s4(
+            pretrained=pretrained, num_classes=bins, inference_mode=inference_mode
+        )
     else:
-        raise ValueError(f"Please choose available model architecture, currently chosen: {arch}")
+        raise ValueError(
+            f"Please choose available model architecture, currently chosen: {arch}"
+        )
     return model
 
 
@@ -55,7 +67,7 @@ def angular_error(gaze_vector, label_vector):
 
 
 def gaze_to_3d(gaze):
-    yaw = gaze[0]   # Horizontal angle
+    yaw = gaze[0]  # Horizontal angle
     pitch = gaze[1]  # Vertical angle
 
     gaze_vector = np.zeros(3)
@@ -66,19 +78,29 @@ def gaze_to_3d(gaze):
     return gaze_vector
 
 
-def get_dataloader(params,  mode="train"):
+def get_dataloader(params, mode="train"):
     """Load dataset and return DataLoader."""
 
-    transform = transforms.Compose([
-        transforms.Resize(448),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    transform = transforms.Compose(
+        [
+            transforms.Resize(448),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
     if params.dataset == "gaze360":
-        dataset = Gaze360(params.data, transform, angle=params.angle, binwidth=params.binwidth, mode=mode)
+        dataset = Gaze360(
+            params.data,
+            transform,
+            angle=params.angle,
+            binwidth=params.binwidth,
+            mode=mode,
+        )
     elif params.dataset == "mpiigaze":
-        dataset = MPIIGaze(params.data, transform, angle=params.angle, binwidth=params.binwidth)
+        dataset = MPIIGaze(
+            params.data, transform, angle=params.angle, binwidth=params.binwidth
+        )
     else:
         raise ValueError("Supported dataset are `gaze360` and `mpiigaze`")
 
@@ -87,9 +109,10 @@ def get_dataloader(params,  mode="train"):
         batch_size=params.batch_size,
         shuffle=True if mode == "train" else False,
         num_workers=params.num_workers,
-        pin_memory=True
+        pin_memory=True,
     )
     return data_loader
+
 
 def draw_gaze(frame, bbox, pitch, yaw, thickness=2, color=(0, 0, 255)):
     """Draws gaze direction on a frame given bounding box and gaze angles."""
@@ -121,9 +144,8 @@ def draw_gaze(frame, bbox, pitch, yaw, thickness=2, color=(0, 0, 255)):
         color=color,
         thickness=thickness,
         line_type=cv2.LINE_AA,
-        tipLength=0.25
+        tipLength=0.25,
     )
-
 
 
 def draw_bbox(image, bbox, color=(0, 255, 0), thickness=2, proportion=0.2):

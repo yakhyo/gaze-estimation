@@ -17,11 +17,11 @@ __all__ = [
     "mobileone_s3",
     "mobileone_s4",
     "mobileone_s5",
-    "reparameterize_model"
+    "reparameterize_model",
 ]
 
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 logger = logging.getLogger()
 
 
@@ -48,18 +48,18 @@ class SqueezeExcitationBlock(nn.Module):
             out_channels=int(in_channels * rd_ratio),
             kernel_size=1,
             stride=1,
-            bias=True
+            bias=True,
         )
         self.expand = nn.Conv2d(
             in_channels=int(in_channels * rd_ratio),
             out_channels=in_channels,
             kernel_size=1,
             stride=1,
-            bias=True
+            bias=True,
         )
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
-        """ Apply forward pass. """
+        """Apply forward pass."""
         b, c, h, w = inputs.size()
         x = F.avg_pool2d(inputs, kernel_size=[h, w])
         x = self.reduce(x)
@@ -71,27 +71,27 @@ class SqueezeExcitationBlock(nn.Module):
 
 
 class MobileOneBlock(nn.Module):
-    """ MobileOne building block.
+    """MobileOne building block.
 
-        This block has a multi-branched architecture at train-time
-        and plain-CNN style architecture at inference time
-        For more details, please refer to our paper:
-        `An Improved One millisecond Mobile Backbone` -
-        https://arxiv.org/pdf/2206.04040.pdf
+    This block has a multi-branched architecture at train-time
+    and plain-CNN style architecture at inference time
+    For more details, please refer to our paper:
+    `An Improved One millisecond Mobile Backbone` -
+    https://arxiv.org/pdf/2206.04040.pdf
     """
 
     def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            kernel_size: int,
-            stride: int = 1,
-            padding: int = 0,
-            dilation: int = 1,
-            groups: int = 1,
-            inference_mode: bool = False,
-            use_se: bool = False,
-            num_conv_branches: int = 1
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int = 1,
+        padding: int = 0,
+        dilation: int = 1,
+        groups: int = 1,
+        inference_mode: bool = False,
+        use_se: bool = False,
+        num_conv_branches: int = 1,
     ) -> None:
         """
         Construct a MobileOneBlock module.
@@ -134,12 +134,15 @@ class MobileOneBlock(nn.Module):
                 padding=padding,
                 dilation=dilation,
                 groups=groups,
-                bias=True
+                bias=True,
             )
         else:
             # Re-parameterizable skip connection
-            self.rbr_skip = nn.BatchNorm2d(num_features=in_channels) \
-                if out_channels == in_channels and stride == 1 else None
+            self.rbr_skip = (
+                nn.BatchNorm2d(num_features=in_channels)
+                if out_channels == in_channels and stride == 1
+                else None
+            )
 
             # Re-parameterizable conv branches
             rbr_conv = list()
@@ -153,7 +156,7 @@ class MobileOneBlock(nn.Module):
                 self.rbr_scale = self._conv_bn(kernel_size=1, padding=0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """ Apply forward pass. """
+        """Apply forward pass."""
         # Inference mode forward pass.
         if self.inference_mode:
             return self.activation(self.se(self.reparam_conv(x)))
@@ -177,8 +180,8 @@ class MobileOneBlock(nn.Module):
         return self.activation(self.se(out))
 
     def reparameterize(self):
-        """ 
-        Following works like `RepVGG: Making VGG-style ConvNets Great Again` - https://arxiv.org/pdf/2101.03697.pdf. 
+        """
+        Following works like `RepVGG: Making VGG-style ConvNets Great Again` - https://arxiv.org/pdf/2101.03697.pdf.
         We re-parameterize multi-branched architecture used at training time to obtain a plain CNN-like structure
         for inference.
         """
@@ -193,7 +196,7 @@ class MobileOneBlock(nn.Module):
             padding=self.rbr_conv[0].conv.padding,
             dilation=self.rbr_conv[0].conv.dilation,
             groups=self.rbr_conv[0].conv.groups,
-            bias=True
+            bias=True,
         )
         self.reparam_conv.weight.data = kernel
         self.reparam_conv.bias.data = bias
@@ -201,10 +204,10 @@ class MobileOneBlock(nn.Module):
         # Delete un-used branches
         for para in self.parameters():
             para.detach_()
-        self.__delattr__('rbr_conv')
-        self.__delattr__('rbr_scale')
-        if hasattr(self, 'rbr_skip'):
-            self.__delattr__('rbr_skip')
+        self.__delattr__("rbr_conv")
+        self.__delattr__("rbr_scale")
+        if hasattr(self, "rbr_skip"):
+            self.__delattr__("rbr_skip")
 
         self.inference_mode = True
 
@@ -266,17 +269,17 @@ class MobileOneBlock(nn.Module):
             eps = branch.bn.eps
         else:
             assert isinstance(branch, nn.BatchNorm2d)
-            if not hasattr(self, 'id_tensor'):
+            if not hasattr(self, "id_tensor"):
                 input_dim = self.in_channels // self.groups
                 kernel_value = torch.zeros(
                     (self.in_channels, input_dim, self.kernel_size, self.kernel_size),
                     dtype=branch.weight.dtype,
-                    device=branch.weight.device
+                    device=branch.weight.device,
                 )
                 for i in range(self.in_channels):
-                    kernel_value[i, i % input_dim,
-                                 self.kernel_size // 2,
-                                 self.kernel_size // 2] = 1
+                    kernel_value[
+                        i, i % input_dim, self.kernel_size // 2, self.kernel_size // 2
+                    ] = 1
                 self.id_tensor = kernel_value
             kernel = self.id_tensor
             running_mean = branch.running_mean
@@ -301,7 +304,7 @@ class MobileOneBlock(nn.Module):
         """
         mod_list = nn.Sequential()
         mod_list.add_module(
-            'conv',
+            "conv",
             nn.Conv2d(
                 in_channels=self.in_channels,
                 out_channels=self.out_channels,
@@ -309,10 +312,10 @@ class MobileOneBlock(nn.Module):
                 stride=self.stride,
                 padding=padding,
                 groups=self.groups,
-                bias=False
-            )
+                bias=False,
+            ),
         )
-        mod_list.add_module('bn', nn.BatchNorm2d(num_features=self.out_channels))
+        mod_list.add_module("bn", nn.BatchNorm2d(num_features=self.out_channels))
         return mod_list
 
 
@@ -325,13 +328,13 @@ class MobileOne(nn.Module):
     """
 
     def __init__(
-            self,
-            num_blocks_per_stage: List[int] = [2, 8, 10, 1],
-            num_classes: int = 1000,
-            width_multipliers: Optional[List[float]] = None,
-            inference_mode: bool = False,
-            use_se: bool = False,
-            num_conv_branches: int = 1
+        self,
+        num_blocks_per_stage: List[int] = [2, 8, 10, 1],
+        num_classes: int = 1000,
+        width_multipliers: Optional[List[float]] = None,
+        inference_mode: bool = False,
+        use_se: bool = False,
+        num_conv_branches: int = 1,
     ) -> None:
         """
         Construct MobileOne model.
@@ -359,20 +362,24 @@ class MobileOne(nn.Module):
             kernel_size=3,
             stride=2,
             padding=1,
-            inference_mode=self.inference_mode
+            inference_mode=self.inference_mode,
         )
         self.cur_layer_idx = 1
-        self.stage1 = self._make_stage(int(64 * width_multipliers[0]), num_blocks_per_stage[0], num_se_blocks=0)
-        self.stage2 = self._make_stage(int(128 * width_multipliers[1]), num_blocks_per_stage[1], num_se_blocks=0)
+        self.stage1 = self._make_stage(
+            int(64 * width_multipliers[0]), num_blocks_per_stage[0], num_se_blocks=0
+        )
+        self.stage2 = self._make_stage(
+            int(128 * width_multipliers[1]), num_blocks_per_stage[1], num_se_blocks=0
+        )
         self.stage3 = self._make_stage(
             int(256 * width_multipliers[2]),
             num_blocks_per_stage[2],
-            num_se_blocks=int(num_blocks_per_stage[2] // 2) if use_se else 0
+            num_se_blocks=int(num_blocks_per_stage[2] // 2) if use_se else 0,
         )
         self.stage4 = self._make_stage(
             int(512 * width_multipliers[3]),
             num_blocks_per_stage[3],
-            num_se_blocks=num_blocks_per_stage[3] if use_se else 0
+            num_se_blocks=num_blocks_per_stage[3] if use_se else 0,
         )
         self.gap = nn.AdaptiveAvgPool2d(output_size=1)
 
@@ -382,7 +389,9 @@ class MobileOne(nn.Module):
 
         # self.linear = nn.Linear(int(512 * width_multipliers[3]), num_classes)
 
-    def _make_stage(self, planes: int, num_blocks: int, num_se_blocks: int) -> nn.Sequential:
+    def _make_stage(
+        self, planes: int, num_blocks: int, num_se_blocks: int
+    ) -> nn.Sequential:
         """
         Build a stage of the MobileOne model.
 
@@ -396,7 +405,7 @@ class MobileOne(nn.Module):
         """
 
         # Get strides for all layers
-        strides = [2] + [1]*(num_blocks-1)
+        strides = [2] + [1] * (num_blocks - 1)
         blocks = []
         for ix, stride in enumerate(strides):
             use_se = False
@@ -416,7 +425,7 @@ class MobileOne(nn.Module):
                     groups=self.in_planes,
                     inference_mode=self.inference_mode,
                     use_se=use_se,
-                    num_conv_branches=self.num_conv_branches
+                    num_conv_branches=self.num_conv_branches,
                 )
             )
             # Pointwise conv
@@ -430,7 +439,7 @@ class MobileOne(nn.Module):
                     groups=1,
                     inference_mode=self.inference_mode,
                     use_se=use_se,
-                    num_conv_branches=self.num_conv_branches
+                    num_conv_branches=self.num_conv_branches,
                 )
             )
             self.in_planes = planes
@@ -438,7 +447,7 @@ class MobileOne(nn.Module):
         return nn.Sequential(*blocks)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """ Apply forward pass . """
+        """Apply forward pass ."""
         x = self.stage0(x)
         x = self.stage1(x)
         x = self.stage2(x)
@@ -469,55 +478,38 @@ def reparameterize_model(model: torch.nn.Module) -> nn.Module:
     # Avoid editing original graph
     model = copy.deepcopy(model)
     for module in model.modules():
-        if hasattr(module, 'reparameterize'):
+        if hasattr(module, "reparameterize"):
             module.reparameterize()
     return model
 
 
 MOBILEONE_CONFIGS = {
-    "mobileone_s0":
-        {
-            "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s0_unfused.pth.tar",
-            "params":
-                {
-                    "width_multipliers": (0.75, 1.0, 1.0, 2.0),
-                    "num_conv_branches": 4
-                }
+    "mobileone_s0": {
+        "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s0_unfused.pth.tar",
+        "params": {"width_multipliers": (0.75, 1.0, 1.0, 2.0), "num_conv_branches": 4},
+    },
+    "mobileone_s1": {
+        "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s1_unfused.pth.tar",
+        "params": {
+            "width_multipliers": (1.5, 1.5, 2.0, 2.5),
         },
-    "mobileone_s1":
-        {
-            "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s1_unfused.pth.tar",
-            "params":
-                {
-                    "width_multipliers": (1.5, 1.5, 2.0, 2.5),
-                }
-
+    },
+    "mobileone_s2": {
+        "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s2_unfused.pth.tar",
+        "params": {
+            "width_multipliers": (1.5, 2.0, 2.5, 4.0),
         },
-    "mobileone_s2":
-        {
-            "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s2_unfused.pth.tar",
-            "params":
-                {
-                    "width_multipliers": (1.5, 2.0, 2.5, 4.0),
-                }
+    },
+    "mobileone_s3": {
+        "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s3_unfused.pth.tar",
+        "params": {
+            "width_multipliers": (2.0, 2.5, 3.0, 4.0),
         },
-    "mobileone_s3":
-        {
-            "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s3_unfused.pth.tar",
-            "params":
-                {
-                    "width_multipliers": (2.0, 2.5, 3.0, 4.0),
-                }
-        },
-    "mobileone_s4":
-        {
-            "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s4_unfused.pth.tar",
-            "params":
-                {
-                    "width_multipliers": (3.0, 3.5, 3.5, 4.0),
-                    "use_se": True
-                }
-        }
+    },
+    "mobileone_s4": {
+        "weights": "https://docs-assets.developer.apple.com/ml-research/datasets/mobileone/mobileone_s4_unfused.pth.tar",
+        "params": {"width_multipliers": (3.0, 3.5, 3.5, 4.0), "use_se": True},
+    },
 }
 
 
@@ -529,12 +521,19 @@ def load_filtered_state_dict(model, state_dict):
         state_dict: A dictionary of parameters to load into the model.
     """
     current_model_dict = model.state_dict()
-    filtered_state_dict = {key: value for key, value in state_dict.items() if key in current_model_dict}
+    filtered_state_dict = {
+        key: value for key, value in state_dict.items() if key in current_model_dict
+    }
     current_model_dict.update(filtered_state_dict)
     model.load_state_dict(current_model_dict)
 
 
-def create_mobileone_model(config, pretrained: bool = True, num_classes: int = 1000, inference_mode: bool = False) -> nn.Module:
+def create_mobileone_model(
+    config,
+    pretrained: bool = True,
+    num_classes: int = 1000,
+    inference_mode: bool = False,
+) -> nn.Module:
     """
     Create a MobileOne model based on the specified architecture name.
 
@@ -567,23 +566,33 @@ def create_mobileone_model(config, pretrained: bool = True, num_classes: int = 1
 
 
 def mobileone_s0(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(MOBILEONE_CONFIGS['mobileone_s0'], pretrained, num_classes, inference_mode)
+    return create_mobileone_model(
+        MOBILEONE_CONFIGS["mobileone_s0"], pretrained, num_classes, inference_mode
+    )
 
 
 def mobileone_s1(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(MOBILEONE_CONFIGS['mobileone_s1'], pretrained, num_classes, inference_mode)
+    return create_mobileone_model(
+        MOBILEONE_CONFIGS["mobileone_s1"], pretrained, num_classes, inference_mode
+    )
 
 
 def mobileone_s2(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(MOBILEONE_CONFIGS['mobileone_s2'], pretrained, num_classes, inference_mode)
+    return create_mobileone_model(
+        MOBILEONE_CONFIGS["mobileone_s2"], pretrained, num_classes, inference_mode
+    )
 
 
 def mobileone_s3(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(MOBILEONE_CONFIGS['mobileone_s3'], pretrained, num_classes, inference_mode)
+    return create_mobileone_model(
+        MOBILEONE_CONFIGS["mobileone_s3"], pretrained, num_classes, inference_mode
+    )
 
 
 def mobileone_s4(pretrained=True, num_classes=1000, inference_mode=False):
-    return create_mobileone_model(MOBILEONE_CONFIGS['mobileone_s4'], pretrained, num_classes, inference_mode)
+    return create_mobileone_model(
+        MOBILEONE_CONFIGS["mobileone_s4"], pretrained, num_classes, inference_mode
+    )
 
 
 if __name__ == "__main__":

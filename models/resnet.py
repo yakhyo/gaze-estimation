@@ -8,7 +8,13 @@ from typing import Any, Callable, List, Optional, Type, Tuple
 __all__ = ["resnet18", "resnet34", "resnet50"]
 
 
-def conv3x3(in_channels: int, out_channels: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
+def conv3x3(
+    in_channels: int,
+    out_channels: int,
+    stride: int = 1,
+    groups: int = 1,
+    dilation: int = 1,
+) -> nn.Conv2d:
     """3x3 convolution with padding"""
     return nn.Conv2d(
         in_channels,
@@ -24,22 +30,24 @@ def conv3x3(in_channels: int, out_channels: int, stride: int = 1, groups: int = 
 
 def conv1x1(in_channels: int, out_channels: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
-    return nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)
+    return nn.Conv2d(
+        in_channels, out_channels, kernel_size=1, stride=stride, bias=False
+    )
 
 
 class BasicBlock(nn.Module):
     expansion: int = 1
 
     def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            stride: int = 1,
-            downsample: Optional[nn.Module] = None,
-            groups: int = 1,
-            base_width: int = 64,
-            dilation: int = 1,
-            norm_layer: Optional[Callable[..., nn.Module]] = None,
+        self,
+        in_channels: int,
+        out_channels: int,
+        stride: int = 1,
+        downsample: Optional[nn.Module] = None,
+        groups: int = 1,
+        base_width: int = 64,
+        dilation: int = 1,
+        norm_layer: Optional[Callable[..., nn.Module]] = None,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -130,14 +138,14 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
     def __init__(
-            self,
-            block: Type[BasicBlock | Bottleneck],
-            layers: List[int],
-            num_classes: int = 1000,
-            groups: int = 1,
-            width_per_group: int = 64,
-            replace_stride_with_dilation: Optional[List[bool]] = None,
-            norm_layer: Optional[Callable[..., nn.Module]] = None,
+        self,
+        block: Type[BasicBlock | Bottleneck],
+        layers: List[int],
+        num_classes: int = 1000,
+        groups: int = 1,
+        width_per_group: int = 64,
+        replace_stride_with_dilation: Optional[List[bool]] = None,
+        norm_layer: Optional[Callable[..., nn.Module]] = None,
     ) -> None:
         super().__init__()
         if norm_layer is None:
@@ -157,14 +165,22 @@ class ResNet(nn.Module):
             )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.in_channels, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(
+            3, self.in_channels, kernel_size=7, stride=2, padding=3, bias=False
+        )
         self.bn1 = norm_layer(self.in_channels)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])
+        self.layer2 = self._make_layer(
+            block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
+        )
+        self.layer3 = self._make_layer(
+            block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
+        )
+        self.layer4 = self._make_layer(
+            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
+        )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         # yaw and pitch
@@ -182,12 +198,12 @@ class ResNet(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def _make_layer(
-            self,
-            block: Type[BasicBlock | Bottleneck],
-            planes: int,
-            blocks: int,
-            stride: int = 1,
-            dilate: bool = False,
+        self,
+        block: Type[BasicBlock | Bottleneck],
+        planes: int,
+        blocks: int,
+        stride: int = 1,
+        dilate: bool = False,
     ) -> nn.Sequential:
         norm_layer = self._norm_layer
         downsample = None
@@ -211,7 +227,7 @@ class ResNet(nn.Module):
                 self.groups,
                 self.base_width,
                 previous_dilation,
-                norm_layer
+                norm_layer,
             )
         )
         self.in_channels = planes * block.expansion
@@ -259,12 +275,20 @@ def load_filtered_state_dict(model, state_dict):
         state_dict: A dictionary of parameters to load into the model.
     """
     current_model_dict = model.state_dict()
-    filtered_state_dict = {key: value for key, value in state_dict.items() if key in current_model_dict}
+    filtered_state_dict = {
+        key: value for key, value in state_dict.items() if key in current_model_dict
+    }
     current_model_dict.update(filtered_state_dict)
     model.load_state_dict(current_model_dict)
 
 
-def _resnet(block: Type[BasicBlock], layers: List[int], weights: Optional[ResNet34_Weights], progress: bool, **kwargs: Any) -> ResNet:
+def _resnet(
+    block: Type[BasicBlock],
+    layers: List[int],
+    weights: Optional[ResNet34_Weights],
+    progress: bool,
+    **kwargs: Any,
+) -> ResNet:
     model = ResNet(block, layers, **kwargs)
 
     if weights is not None:
@@ -274,7 +298,9 @@ def _resnet(block: Type[BasicBlock], layers: List[int], weights: Optional[ResNet
     return model
 
 
-def resnet18(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
+def resnet18(
+    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
+) -> ResNet:
     if pretrained:
         weights = ResNet18_Weights.DEFAULT
     else:
@@ -282,7 +308,9 @@ def resnet18(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -
     return _resnet(BasicBlock, [2, 2, 2, 2], weights, progress, **kwargs)
 
 
-def resnet34(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
+def resnet34(
+    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
+) -> ResNet:
     if pretrained:
         weights = ResNet34_Weights.DEFAULT
     else:
@@ -290,7 +318,9 @@ def resnet34(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -
     return _resnet(BasicBlock, [3, 4, 6, 3], weights, progress, **kwargs)
 
 
-def resnet50(*, pretrained: bool = True, progress: bool = True, **kwargs: Any) -> ResNet:
+def resnet50(
+    *, pretrained: bool = True, progress: bool = True, **kwargs: Any
+) -> ResNet:
     if pretrained:
         weights = ResNet50_Weights.DEFAULT
     else:

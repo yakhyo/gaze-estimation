@@ -12,27 +12,47 @@ from config import data_config
 from utils.helpers import get_model, get_dataloader
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 
 
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(description="Gaze estimation training")
-    parser.add_argument("--data", type=str, default="data", help="Directory path for gaze images.")
-    parser.add_argument("--dataset", type=str, default="gaze360", help="Dataset name, available `gaze360`, `mpiigaze`.")
-    parser.add_argument("--output", type=str, default="output/", help="Path of output models.")
-    parser.add_argument("--checkpoint", type=str, default="", help="Path to checkpoint for resuming training.")
-    parser.add_argument("--num-epochs", type=int, default=100, help="Maximum number of training epochs.")
+    parser.add_argument(
+        "--data", type=str, default="data", help="Directory path for gaze images."
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="gaze360",
+        help="Dataset name, available `gaze360`, `mpiigaze`.",
+    )
+    parser.add_argument(
+        "--output", type=str, default="output/", help="Path of output models."
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="",
+        help="Path to checkpoint for resuming training.",
+    )
+    parser.add_argument(
+        "--num-epochs", type=int, default=100, help="Maximum number of training epochs."
+    )
     parser.add_argument("--batch-size", type=int, default=64, help="Batch size.")
     parser.add_argument(
         "--arch",
         type=str,
         default="resnet18",
-        help="Network architecture, currently available: resnet18/34/50, mobilenetv2, mobileone_s0-s4."
+        help="Network architecture, currently available: resnet18/34/50, mobilenetv2, mobileone_s0-s4.",
     )
-    parser.add_argument("--alpha", type=float, default=1, help="Regression loss coefficient.")
+    parser.add_argument(
+        "--alpha", type=float, default=1, help="Regression loss coefficient."
+    )
     parser.add_argument("--lr", type=float, default=0.00001, help="Base learning rate.")
-    parser.add_argument("--num-workers", type=int, default=8, help="Number of workers for data loading.")
+    parser.add_argument(
+        "--num-workers", type=int, default=8, help="Number of workers for data loading."
+    )
 
     args = parser.parse_args()
 
@@ -43,7 +63,9 @@ def parse_args():
         args.binwidth = dataset_config["binwidth"]
         args.angle = dataset_config["angle"]
     else:
-        raise ValueError(f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}")
+        raise ValueError(
+            f"Unknown dataset: {args.dataset}. Available options: {list(data_config.keys())}"
+        )
 
     return args
 
@@ -65,8 +87,8 @@ def initialize_model(params, device):
 
     if params.checkpoint:
         checkpoint = torch.load(params.checkpoint, map_location=device)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        model.load_state_dict(checkpoint["model_state_dict"])
+        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
         # Move optimizer states to device
         for state in optimizer.state.values():
@@ -74,8 +96,10 @@ def initialize_model(params, device):
                 if isinstance(v, torch.Tensor):
                     state[k] = v.to(device)
 
-        start_epoch = checkpoint['epoch']
-        logging.info(f'Resumed training from {params.checkpoint}, starting at epoch {start_epoch + 1}')
+        start_epoch = checkpoint["epoch"]
+        logging.info(
+            f"Resumed training from {params.checkpoint}, starting at epoch {start_epoch + 1}"
+        )
 
     return model.to(device), optimizer, start_epoch
 
@@ -89,7 +113,7 @@ def train_one_epoch(
     data_loader,
     idx_tensor,
     device,
-    epoch
+    epoch,
 ):
     """
     Train the model for one epoch.
@@ -134,7 +158,9 @@ def train_one_epoch(
         pitch, yaw = F.softmax(pitch, dim=1), F.softmax(yaw, dim=1)
 
         # Mapping from binned (0 to 90) to angels (-180 to 180)
-        pitch_predicted = torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
+        pitch_predicted = (
+            torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
+        )
         yaw_predicted = torch.sum(yaw * idx_tensor, 1) * params.binwidth - params.angle
 
         # Mean Squared Error Loss
@@ -157,10 +183,13 @@ def train_one_epoch(
 
         if (idx + 1) % 100 == 0:
             logging.info(
-                f'Epoch [{epoch + 1}/{params.num_epochs}], Iter [{idx + 1}/{len(data_loader)}] '
-                f'Losses: Gaze Yaw {sum_loss_yaw / (idx + 1):.4f}, Gaze Pitch {sum_loss_pitch / (idx + 1):.4f}'
+                f"Epoch [{epoch + 1}/{params.num_epochs}], Iter [{idx + 1}/{len(data_loader)}] "
+                f"Losses: Gaze Yaw {sum_loss_yaw / (idx + 1):.4f}, Gaze Pitch {sum_loss_pitch / (idx + 1):.4f}"
             )
-    avg_loss_pitch, avg_loss_yaw = sum_loss_pitch / len(data_loader), sum_loss_yaw / len(data_loader)
+    avg_loss_pitch, avg_loss_yaw = (
+        sum_loss_pitch / len(data_loader),
+        sum_loss_yaw / len(data_loader),
+    )
 
     return avg_loss_pitch, avg_loss_yaw
 
@@ -169,7 +198,7 @@ def main():
     params = parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    summary_name = f'{params.dataset}_{params.arch}_{int(time.time())}'
+    summary_name = f"{params.dataset}_{params.arch}_{int(time.time())}"
     output = os.path.join(params.output, summary_name)
     if not os.path.exists(output):
         os.makedirs(output)
@@ -182,7 +211,7 @@ def main():
     reg_criterion = nn.MSELoss()
     idx_tensor = torch.arange(params.bins, device=device, dtype=torch.float32)
 
-    best_loss = float('inf')
+    best_loss = float("inf")
     print(f"Started training from epoch: {start_epoch + 1}")
 
     for epoch in range(start_epoch, params.num_epochs):
@@ -195,30 +224,33 @@ def main():
             train_loader,
             idx_tensor,
             device,
-            epoch
+            epoch,
         )
 
         logging.info(
-            f'Epoch [{epoch + 1}/{params.num_epochs}] '
-            f'Losses: Gaze Yaw {avg_loss_yaw:.4f}, Gaze Pitch {avg_loss_pitch:.4f}'
+            f"Epoch [{epoch + 1}/{params.num_epochs}] "
+            f"Losses: Gaze Yaw {avg_loss_yaw:.4f}, Gaze Pitch {avg_loss_pitch:.4f}"
         )
 
         checkpoint_path = os.path.join(output, "checkpoint.ckpt")
-        torch.save({
-            'epoch': epoch + 1,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': avg_loss_pitch + avg_loss_yaw,
-        }, checkpoint_path)
-        logging.info(f'Checkpoint saved at {checkpoint_path}')
+        torch.save(
+            {
+                "epoch": epoch + 1,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "loss": avg_loss_pitch + avg_loss_yaw,
+            },
+            checkpoint_path,
+        )
+        logging.info(f"Checkpoint saved at {checkpoint_path}")
 
         current_loss = (avg_loss_pitch + avg_loss_yaw) / len(train_loader)
         if current_loss < best_loss:
             best_loss = current_loss
-            best_model_path = os.path.join(output, 'best_model.pt')
+            best_model_path = os.path.join(output, "best_model.pt")
             torch.save(model.state_dict(), best_model_path)
-            logging.info(f'Best model saved at {best_model_path}')
+            logging.info(f"Best model saved at {best_model_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
