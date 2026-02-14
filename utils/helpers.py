@@ -54,10 +54,8 @@ def angular_error(gaze_vector, label_vector):
     return np.degrees(np.arccos(cosine_similarity))
 
 
-def gaze_to_3d(gaze):
-    yaw = gaze[0]  # Horizontal angle
-    pitch = gaze[1]  # Vertical angle
-
+def gaze_to_3d(yaw: float, pitch: float) -> np.ndarray:
+    """Convert yaw (horizontal) and pitch (vertical) angles to a 3D gaze vector."""
     gaze_vector = np.zeros(3)
     gaze_vector[0] = -np.cos(pitch) * np.sin(yaw)
     gaze_vector[1] = -np.sin(pitch)
@@ -113,10 +111,10 @@ def draw_gaze(frame, bbox, pitch, yaw, thickness=2, color=(0, 0, 255)):
     if len(frame.shape) == 2 or frame.shape[2] == 1:
         frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-    # Calculate the direction of the gaze
+    # Calculate the direction of the gaze (yaw = horizontal, pitch = vertical)
     length = x_max - x_min
-    dx = int(-length * np.sin(pitch) * np.cos(yaw))
-    dy = int(-length * np.sin(yaw))
+    dx = int(-length * np.sin(yaw) * np.cos(pitch))
+    dy = int(-length * np.sin(pitch))
 
     point1 = (x_center, y_center)
     point2 = (x_center + dx, y_center + dy)

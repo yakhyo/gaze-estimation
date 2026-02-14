@@ -75,8 +75,8 @@ def onnx_export(params):
     if params.dynamic:
         dynamic_axes = {
             "input": {0: "batch_size"},
-            "pitch": {0: "batch_size"},
             "yaw": {0: "batch_size"},
+            "pitch": {0: "batch_size"},
         }
         print("Exporting model with dynamic input shapes.")
     else:
@@ -91,7 +91,7 @@ def onnx_export(params):
         opset_version=20,
         do_constant_folding=True,
         input_names=["input"],
-        output_names=["pitch", "yaw"],
+        output_names=["yaw", "pitch"],
         dynamic_axes=dynamic_axes,
     )
 

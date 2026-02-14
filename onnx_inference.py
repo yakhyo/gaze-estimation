@@ -73,20 +73,25 @@ class GazeEstimationONNX:
         e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
         return e_x / e_x.sum(axis=1, keepdims=True)
 
-    def decode(self, pitch_logits: np.ndarray, yaw_logits: np.ndarray) -> Tuple[float, float]:
-        pitch_probs = self.softmax(pitch_logits)
+    def decode(self, yaw_logits: np.ndarray, pitch_logits: np.ndarray) -> Tuple[float, float]:
         yaw_probs = self.softmax(yaw_logits)
+        pitch_probs = self.softmax(pitch_logits)
 
-        pitch = np.sum(pitch_probs * self.idx_tensor, axis=1) * self._binwidth - self._angle_offset
         yaw = np.sum(yaw_probs * self.idx_tensor, axis=1) * self._binwidth - self._angle_offset
+        pitch = np.sum(pitch_probs * self.idx_tensor, axis=1) * self._binwidth - self._angle_offset
 
-        return np.radians(pitch[0]), np.radians(yaw[0])
+        return np.radians(yaw[0]), np.radians(pitch[0])
 
     def estimate(self, face_image: np.ndarray) -> Tuple[float, float]:
+        """Estimate gaze direction from a face image.
+
+        Returns:
+            Tuple of (yaw, pitch) in radians. yaw = horizontal, pitch = vertical.
+        """
         input_tensor = self.preprocess(face_image)
         outputs = self.session.run(self.output_names, {"input": input_tensor})
 
-        return self.decode(outputs[0], outputs[1])
+        return self.decode(outputs[0], outputs[1])  # outputs[0] = yaw, outputs[1] = pitch
 
 
 def parse_args():
@@ -108,8 +113,10 @@ if __name__ == "__main__":
     # Handle numeric webcam index
     try:
         source = int(args.source)
+        is_webcam = True
     except ValueError:
         source = args.source
+        is_webcam = False
 
     cap = cv2.VideoCapture(source)
     if not cap.isOpened():
@@ -133,16 +140,19 @@ if __name__ == "__main__":
         if not ret:
             break
 
+        if is_webcam:
+            frame = cv2.flip(frame, 1)
+
         faces = detector.detect(frame)
 
         for face in faces:
-            bbox = face["bbox"]
+            bbox = face.bbox
             x_min, y_min, x_max, y_max = map(int, bbox[:4])
             face_crop = frame[y_min:y_max, x_min:x_max]
             if face_crop.size == 0:
                 continue
 
-            pitch, yaw = engine.estimate(face_crop)
+            yaw, pitch = engine.estimate(face_crop)
             draw_bbox_gaze(frame, bbox, pitch, yaw)
 
         if writer:

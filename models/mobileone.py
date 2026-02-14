@@ -446,11 +446,10 @@ class MobileOne(nn.Module):
         x = self.gap(x)
         x = x.view(x.size(0), -1)
         # x = self.linear(x)
-
         yaw = self.fc_yaw(x)
         pitch = self.fc_pitch(x)
 
-        return pitch, yaw
+        return yaw, pitch
 
 
 def reparameterize_model(model: torch.nn.Module) -> nn.Module:

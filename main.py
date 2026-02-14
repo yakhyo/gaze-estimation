@@ -125,45 +125,45 @@ def train_one_epoch(
     for idx, (images, labels_gaze, regression_labels_gaze, _) in enumerate(data_loader):
         images = images.to(device)
 
-        # Binned labels
-        label_pitch = labels_gaze[:, 0].to(device)
-        label_yaw = labels_gaze[:, 1].to(device)
+        # Binned labels (index 0 = yaw/horizontal, index 1 = pitch/vertical)
+        label_yaw = labels_gaze[:, 0].to(device)
+        label_pitch = labels_gaze[:, 1].to(device)
 
         # Regression labels
-        label_pitch_regression = regression_labels_gaze[:, 0].to(device)
-        label_yaw_regression = regression_labels_gaze[:, 1].to(device)
+        label_yaw_regression = regression_labels_gaze[:, 0].to(device)
+        label_pitch_regression = regression_labels_gaze[:, 1].to(device)
 
         # Inference
-        pitch, yaw = model(images)
+        yaw, pitch = model(images)
 
         # Cross Entropy Loss
-        loss_pitch = cls_criterion(pitch, label_pitch)
         loss_yaw = cls_criterion(yaw, label_yaw)
+        loss_pitch = cls_criterion(pitch, label_pitch)
 
         # Softmax
-        pitch, yaw = F.softmax(pitch, dim=1), F.softmax(yaw, dim=1)
+        yaw, pitch = F.softmax(yaw, dim=1), F.softmax(pitch, dim=1)
 
-        # Mapping from binned (0 to 90) to angels (-180 to 180)
-        pitch_predicted = torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
+        # Mapping from binned (0 to 90) to angles (-180 to 180)
         yaw_predicted = torch.sum(yaw * idx_tensor, 1) * params.binwidth - params.angle
+        pitch_predicted = torch.sum(pitch * idx_tensor, 1) * params.binwidth - params.angle
 
         # Mean Squared Error Loss
-        loss_regression_pitch = reg_criterion(pitch_predicted, label_pitch_regression)
         loss_regression_yaw = reg_criterion(yaw_predicted, label_yaw_regression)
+        loss_regression_pitch = reg_criterion(pitch_predicted, label_pitch_regression)
 
         # Calculate loss with regression alpha
-        loss_pitch += params.alpha * loss_regression_pitch
         loss_yaw += params.alpha * loss_regression_yaw
+        loss_pitch += params.alpha * loss_regression_pitch
 
-        # Total loss for pitch and yaw
-        loss = loss_pitch + loss_yaw
+        # Total loss for yaw and pitch
+        loss = loss_yaw + loss_pitch
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        sum_loss_pitch += loss_pitch.item()
         sum_loss_yaw += loss_yaw.item()
+        sum_loss_pitch += loss_pitch.item()
 
         if (idx + 1) % 100 == 0:
             logging.info(

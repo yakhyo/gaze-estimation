@@ -194,11 +194,10 @@ class MobileNetV2(nn.Module):
 
         # Original FC layer from MobileNet V2
         # x = self.classifier(x)
-
         yaw = self.fc_yaw(x)
         pitch = self.fc_pitch(x)
 
-        return pitch, yaw
+        return yaw, pitch
 
 
 def load_filtered_state_dict(model, state_dict):

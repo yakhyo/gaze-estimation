@@ -37,9 +37,9 @@ class Gaze360(Dataset):
             for line in tqdm(lines, desc="Loading Labels"):
                 gaze2d = line.strip().split(" ")[5]
                 label = np.array(gaze2d.split(",")).astype(float)
-                pitch, yaw = label * 180 / np.pi
+                yaw, pitch = label * 180 / np.pi  # label[0] = yaw (horizontal), label[1] = pitch (vertical)
 
-                if abs(pitch) <= self.angle and abs(yaw) <= self.angle:
+                if abs(yaw) <= self.angle and abs(pitch) <= self.angle:
                     self.lines.append(line)
 
         removed_items = self.orig_list_len - len(self.lines)
@@ -56,7 +56,7 @@ class Gaze360(Dataset):
         gaze2d = line[5]
 
         label = np.array(gaze2d.split(",")).astype(float)
-        pitch, yaw = label * 180 / np.pi
+        yaw, pitch = label * 180 / np.pi  # label[0] = yaw (horizontal), label[1] = pitch (vertical)
 
         image = Image.open(os.path.join(self.images_dir, image_path))
         if self.transform is not None:
@@ -64,11 +64,11 @@ class Gaze360(Dataset):
 
         # bin values
         bins = np.arange(-self.angle, self.angle, self.binwidth)
-        binned_pose = np.digitize([pitch, yaw], bins) - 1
+        binned_pose = np.digitize([yaw, pitch], bins) - 1
 
         # binned and regression labels
         binned_labels = torch.tensor(binned_pose, dtype=torch.long)
-        regression_labels = torch.tensor([pitch, yaw], dtype=torch.float32)
+        regression_labels = torch.tensor([yaw, pitch], dtype=torch.float32)
 
         return image, binned_labels, regression_labels, filename
 
@@ -93,9 +93,9 @@ class MPIIGaze(Dataset):
                 for line in lines:
                     gaze2d = line.strip().split(" ")[7]
                     label = np.array(gaze2d.split(",")).astype("float")
-                    pitch, yaw = label * 180 / np.pi
+                    yaw, pitch = label * 180 / np.pi  # label[0] = yaw (horizontal), label[1] = pitch (vertical)
 
-                    if abs(pitch) <= self.angle and abs(yaw) <= self.angle:
+                    if abs(yaw) <= self.angle and abs(pitch) <= self.angle:
                         self.lines.append(line)
 
         removed_items = self.orig_list_len - len(self.lines)
@@ -112,7 +112,7 @@ class MPIIGaze(Dataset):
         gaze2d = line[7]
 
         label = np.array(gaze2d.split(",")).astype("float")
-        pitch, yaw = label * 180 / np.pi
+        yaw, pitch = label * 180 / np.pi  # label[0] = yaw (horizontal), label[1] = pitch (vertical)
 
         image = Image.open(os.path.join(self.images_dir, image_path))
         if self.transform is not None:
@@ -120,10 +120,10 @@ class MPIIGaze(Dataset):
 
         # bin values
         bins = np.arange(-self.angle, self.angle, self.binwidth)
-        binned_pose = np.digitize([pitch, yaw], bins) - 1
+        binned_pose = np.digitize([yaw, pitch], bins) - 1
 
         # binned and regression labels
         binned_labels = torch.tensor(binned_pose, dtype=torch.long)
-        regression_labels = torch.tensor([pitch, yaw], dtype=torch.float32)
+        regression_labels = torch.tensor([yaw, pitch], dtype=torch.float32)
 
         return image, binned_labels, regression_labels, filename

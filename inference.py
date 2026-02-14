@@ -95,7 +95,8 @@ def main(params):
     gaze_detector.eval()
 
     video_source = params.source
-    if video_source.isdigit() or video_source == "0":
+    is_webcam = video_source.isdigit()
+    if is_webcam:
         cap = cv2.VideoCapture(int(video_source))
     else:
         cap = cv2.VideoCapture(video_source)
@@ -117,29 +118,32 @@ def main(params):
                 logging.info("Failed to obtain frame or EOF")
                 break
 
+            if is_webcam:
+                frame = cv2.flip(frame, 1)
+
             faces = face_detector.detect(frame)
             for face in faces:
-                bbox = face["bbox"]
+                bbox = face.bbox
                 x_min, y_min, x_max, y_max = map(int, bbox[:4])
 
                 image = frame[y_min:y_max, x_min:x_max]
                 image = pre_process(image)
                 image = image.to(device)
 
-                pitch, yaw = gaze_detector(image)
+                yaw, pitch = gaze_detector(image)
 
-                pitch_predicted, yaw_predicted = (
-                    F.softmax(pitch, dim=1),
+                yaw_predicted, pitch_predicted = (
                     F.softmax(yaw, dim=1),
+                    F.softmax(pitch, dim=1),
                 )
 
                 # Mapping from binned (0 to 90) to angles (-180 to 180) or (0 to 28) to angles (-42, 42)
-                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
                 yaw_predicted = torch.sum(yaw_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, dim=1) * params.binwidth - params.angle
 
                 # Degrees to Radians
-                pitch_predicted = np.radians(pitch_predicted.cpu())
                 yaw_predicted = np.radians(yaw_predicted.cpu())
+                pitch_predicted = np.radians(pitch_predicted.cpu())
 
                 # draw box and gaze direction
                 draw_bbox_gaze(frame, bbox, pitch_predicted, yaw_predicted)

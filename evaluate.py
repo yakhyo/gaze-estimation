@@ -78,26 +78,26 @@ def evaluate(params, model, data_loader, idx_tensor, device):
         total_samples += regression_labels_gaze.size(0)
         images = images.to(device)
 
-        # Regression labels
-        label_pitch = np.radians(regression_labels_gaze[:, 0], dtype=np.float32)
-        label_yaw = np.radians(regression_labels_gaze[:, 1], dtype=np.float32)
+        # Regression labels (index 0 = yaw/horizontal, index 1 = pitch/vertical)
+        label_yaw = np.radians(regression_labels_gaze[:, 0], dtype=np.float32)
+        label_pitch = np.radians(regression_labels_gaze[:, 1], dtype=np.float32)
 
         # Inference
-        pitch, yaw = model(images)
+        yaw, pitch = model(images)
 
         # Regression predictions
-        pitch_predicted = F.softmax(pitch, dim=1)
         yaw_predicted = F.softmax(yaw, dim=1)
+        pitch_predicted = F.softmax(pitch, dim=1)
 
         # Mapping from binned (0 to 90) to angles (-180 to 180) or (0 to 28) to angles (-42, 42)
-        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * params.binwidth - params.angle
         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * params.binwidth - params.angle
+        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * params.binwidth - params.angle
 
-        pitch_predicted = np.radians(pitch_predicted.cpu())
         yaw_predicted = np.radians(yaw_predicted.cpu())
+        pitch_predicted = np.radians(pitch_predicted.cpu())
 
         for p, y, pl, yl in zip(pitch_predicted, yaw_predicted, label_pitch, label_yaw):
-            average_error += angular_error(gaze_to_3d([p, y]), gaze_to_3d([pl, yl]))
+            average_error += angular_error(gaze_to_3d(yaw=y, pitch=p), gaze_to_3d(yaw=yl, pitch=pl))
 
     logging.info(
         f"Dataset: {params.dataset} | "
