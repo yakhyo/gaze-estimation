@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gaze estimation inference")
-    parser.add_argument("--model", type=str, default="resnet34", help="Model name, default `resnet18`")
+    parser.add_argument("--model", type=str, default="resnet34", help="Model name, default `resnet34`")
     parser.add_argument(
         "--weight",
         type=str,

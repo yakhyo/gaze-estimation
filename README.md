@@ -156,7 +156,7 @@ python evaluate.py --data [dataset_path] --dataset [dataset_name] --weight [weig
 `evaluate.py` arguments:
 
 ```
-usage: evaluate.py [-h] [--data DATA] [--dataset DATASET] [--weights WEIGHTS] [--batch-size BATCH_SIZE] [--arch ARCH] [--num-workers NUM_WORKERS]
+usage: evaluate.py [-h] [--data DATA] [--dataset DATASET] [--weight WEIGHT] [--batch-size BATCH_SIZE] [--arch ARCH] [--num-workers NUM_WORKERS]
 
 Gaze estimation evaluation.
 
@@ -164,7 +164,7 @@ options:
   -h, --help            show this help message and exit
   --data DATA           Directory path for gaze images.
   --dataset DATASET     Dataset name, available `gaze360`, `mpiigaze`
-  --weights WEIGHTS     Path to model weight for evaluation.
+  --weight WEIGHT       Path to model weight for evaluation.
   --batch-size BATCH_SIZE
                         Batch size.
   --arch ARCH           Network architecture, currently available: resnet18/34/50, mobilenetv2, mobileone_s0-s4.
