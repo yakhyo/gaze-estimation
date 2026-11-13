@@ -93,6 +93,7 @@ def onnx_export(params):
         input_names=["input"],
         output_names=["yaw", "pitch"],
         dynamic_axes=dynamic_axes,
+        external_data=False,
     )
 
     print(f"Model exported successfully to {onnx_model}")

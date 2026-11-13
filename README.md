@@ -51,7 +51,7 @@ git clone https://github.com/yakhyo/gaze-estimation.git
 cd gaze-estimation
 ```
 
-2. Install the required dependencies:
+2. Install the required dependencies (Python 3.11 or newer):
 
 ```bash
 pip install -r requirements.txt
