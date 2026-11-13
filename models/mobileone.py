@@ -540,7 +540,7 @@ def create_mobileone_model(
 
     if pretrained:
         try:
-            state_dict = torch.hub.load_state_dict_from_url(weights)
+            state_dict = torch.hub.load_state_dict_from_url(weights, map_location="cpu")
             load_filtered_state_dict(model, state_dict)
             logger.info("Pre-trained weights successfully loaded.")
         except Exception as e:
